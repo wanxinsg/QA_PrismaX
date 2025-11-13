@@ -1,0 +1,46 @@
+# 测试框架核心依赖
+pytest==7.4.3
+pytest-html==4.1.1
+pytest-xdist==3.5.0
+pytest-timeout==2.2.0
+pytest-rerunfailures==13.0
+
+# HTTP请求库
+requests==2.31.0
+urllib3==2.1.0
+
+# Allure报告
+allure-pytest==2.13.2
+
+# 数据处理
+python-dotenv==1.0.0
+
+# 日志
+colorlog==6.8.0
+
+# 代码覆盖率
+pytest-cov==4.1.0
+
+# 数据生成和处理
+faker==22.0.0
+
+# Excel文件生成
+openpyxl==3.1.5
+
+# JSON处理
+jsonschema==4.20.0
+
+# 时间处理
+python-dateutil==2.8.2
+
+# 配置文件处理
+pyyaml==6.0.1
+
+# 数据库连接（如需要）
+# psycopg2-binary==2.9.9
+# sqlalchemy==2.0.23
+
+# 其他工具
+wheel==0.42.0
+setuptools==69.0.3
+
