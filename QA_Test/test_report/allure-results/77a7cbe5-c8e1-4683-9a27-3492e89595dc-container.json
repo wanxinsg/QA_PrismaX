@@ -1,0 +1,1 @@
+{"uuid": "6e517803-835a-4426-9fdb-10dc1c29e7d1", "children": ["cbf30a34-fee2-4f68-95c7-e4e43954bf52"], "befores": [{"name": "socketio_client", "status": "passed", "start": 1765175841458, "stop": 1765175841465}], "afters": [{"name": "socketio_client::0", "status": "passed", "start": 1765175843437, "stop": 1765175844370}], "start": 1765175841458, "stop": 1765175844370}

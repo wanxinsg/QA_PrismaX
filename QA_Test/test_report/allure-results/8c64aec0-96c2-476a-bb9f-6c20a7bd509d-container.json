@@ -1,0 +1,1 @@
+{"uuid": "22f2624c-c207-40d8-9dda-cc2ef126cba3", "children": ["bb5b2209-1091-47b6-9e99-aedf9b710900"], "befores": [{"name": "socketio_client", "status": "passed", "start": 1765178880673, "stop": 1765178880680}], "afters": [{"name": "socketio_client::0", "status": "passed", "start": 1765178882931, "stop": 1765178883926}], "start": 1765178880673, "stop": 1765178883926}
