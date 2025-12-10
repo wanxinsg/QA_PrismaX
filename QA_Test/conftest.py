@@ -12,6 +12,7 @@ from typing import Any, Dict, List
 
 import pytest
 import socketio
+import allure
 
 from case_util.logger import get_logger
 from case_util.http_request import build_http_client_from_env, HttpClient
@@ -32,6 +33,22 @@ def env_config() -> EnvConfig:
 def http_client(env_config: EnvConfig) -> HttpClient:
     return build_http_client_from_env(env_prefix="TELE")
 
+
+@pytest.fixture(autouse=True)
+def annotate_robot(env_config: EnvConfig, request):
+    """
+    Annotate every test with the current robot id so Allure can show
+    arm1/arm2 distinctly. Also append robot id to the test title.
+    """
+    robot = getattr(env_config, "robot_id", "unknown")
+    try:
+        allure.dynamic.parameter("robot", robot)
+        original = getattr(request, "node", None)
+        title = getattr(original, "name", None) or "test"
+        allure.dynamic.title(f"{title} [{robot}]")
+    except Exception:
+        # Non-fatal if Allure dynamic update fails
+        pass
 
 class QueueEventCollector:
     def __init__(self) -> None:
