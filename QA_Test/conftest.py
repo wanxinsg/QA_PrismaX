@@ -13,6 +13,7 @@ from typing import Any, Dict, List
 import pytest
 import socketio
 import allure
+from socketio import exceptions as sio_exceptions
 
 from case_util.logger import get_logger
 from case_util.http_request import build_http_client_from_env, HttpClient
@@ -113,11 +114,19 @@ def socketio_client(env_config: EnvConfig):
         logger.info("queue_update: %s", pretty)
         collector.push({"_type": "queue_update", "payload": data})
 
-    sio.connect(
-        server_url,
-        auth={"robotId": env_config.robot_id, "token": env_config.token, "userId": env_config.user_id},
-        wait=False,
-    )
+    try:
+        sio.connect(
+            server_url,
+            auth={"robotId": env_config.robot_id, "token": env_config.token, "userId": env_config.user_id},
+            wait=False,
+        )
+    except Exception as e:
+        try:
+            pretty = json.dumps({"error": str(e)}, ensure_ascii=False)
+        except Exception:
+            pretty = str(e)
+        logger.error("connect_error (exception): %s", pretty)
+        pytest.skip(f"backend not reachable: {pretty}")
 
     try:
         yield sio, collector

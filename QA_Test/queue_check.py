@@ -35,7 +35,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--robot-id", default=os.getenv("ROBOT_ID", "arm1"), help="Robot ID to join (default: arm1)")
     parser.add_argument("--user-id", default=os.getenv("USER_ID", ""), help="User ID (must match users.userid)")
     parser.add_argument("--token", default=os.getenv("TOKEN", ""), help="User token (must match users.hash_code)")
-    parser.add_argument("--transport", default="websocket", choices=["polling", "websocket"], help="Transport (default: websocket)")
+    # 本地 Tele-Op 服务默认只使用 polling，避免 WebSocket 升级问题；
+    # 如需强制 WebSocket，可显式传入 --transport websocket
+    parser.add_argument(
+        "--transport",
+        default="polling",
+        choices=["polling", "websocket"],
+        help="Engine.IO transport (default: polling; use websocket only if server supports it)",
+    )
     return parser
 
 
@@ -68,6 +75,7 @@ def main() -> None:
     # 创建 Socket.IO 客户端
     # - reconnection=True 开启自动重连
     # - reconnection_attempts=0 表示无限次重连
+    # 注意：transports 需要在 connect() 时传入，不能作为 Client 构造参数
     sio = socketio.Client(
         reconnection=True,
         reconnection_attempts=0,  # unlimited
@@ -116,6 +124,7 @@ def main() -> None:
             server_url,
             auth={"robotId": args.robot_id, "token": args.token, "userId": args.user_id},
             transports=[args.transport],
+            wait_timeout=10,
         )
         # 阻塞等待事件（直到进程被中断）
         sio.wait()

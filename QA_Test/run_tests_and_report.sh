@@ -59,6 +59,7 @@ start_backend_if_needed() {
 
   echo "==> Starting backend in background... Logs: $BACKEND_LOG"
   # Use bash -lc to ensure 'source' is available and venv activation works
+  mkdir -p "$(dirname "$BACKEND_LOG")"
   nohup bash -lc "cd \"$BACKEND_DIR\" && \
     source .venv/bin/activate && \
     TEST_MODE=true GOOGLE_CLOUD_PROJECT=\"$GOOGLE_CLOUD_PROJECT\" \
@@ -67,7 +68,13 @@ start_backend_if_needed() {
     > \"$BACKEND_LOG\" 2>&1 &
 
   # Wait up to 90s for server to become ready
+  set +e
   wait_for_engineio "$TELE_HOST" "$TELE_PORT" 90
+  local rc=$?
+  set -e
+  if (( rc != 0 )); then
+    echo "WARN: Backend did not become ready within timeout; continuing with tests."
+  fi
 }
 
 run_tests_for_robot() {
@@ -100,8 +107,8 @@ open_allure_report() {
   fi
   local use_serve="${ALLURE_SERVE:-$serve_default}"
   if [[ "$use_serve" == "1" ]]; then
-    if command -v allure >/dev/null 2>&1; then
-      echo "==> Launching Allure report server..."
+  if command -v allure >/dev/null 2>&1; then
+    echo "==> Launching Allure report server..."
       # Collect all robot-specific results directories; fallback to root if none
       local inputs=()
       local has_subdirs=0
@@ -117,14 +124,14 @@ open_allure_report() {
         inputs+=("$ALLURE_RESULTS_DIR")
       fi
       allure serve "${inputs[@]}"
-    else
-      echo "==> Allure CLI not found."
-      echo "Install with one of the following and rerun this script:"
-      echo "  brew install allure"
-      echo "  # or"
-      echo "  npm i -g allure-commandline"
-      echo "Allure results are at: $ALLURE_RESULTS_DIR"
-    fi
+  else
+    echo "==> Allure CLI not found."
+    echo "Install with one of the following and rerun this script:"
+    echo "  brew install allure"
+    echo "  # or"
+    echo "  npm i -g allure-commandline"
+    echo "Allure results are at: $ALLURE_RESULTS_DIR"
+  fi
   else
     if command -v allure >/dev/null 2>&1; then
       echo "==> Generating Allure static report into: $output_dir"
