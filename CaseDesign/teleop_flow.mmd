@@ -1,0 +1,26 @@
+flowchart TD
+A[End session with control token] --> B{Session exists and not ended; read tele_op_control_history}
+B --> Z[Stop]
+B --> C[Compute duration seconds]
+C --> D{Inactive and duration under 50s}
+D --> U[Set reward 0]
+D --> E{First time bonus already given; read point_transactions}
+E --> F[Set reward 3000 first_time_tele_op]
+E --> G[If inactive reduce duration by 30s]
+G --> H[Set reward by duration rule robot_control_reward]
+U --> I[Update end time hours reward points; update tele_op_control_history]
+F --> I
+H --> I
+I --> J{Reward greater than 0}
+J --> K[Update users total_points]
+K --> L[Insert into point_transactions]
+J --> M[Done]
+L --> M
+X[Vision success add 100] --> Y[Session reward_points plus 100; update tele_op_control_history]
+Y -.-> I
+
+
+
+
+
+
