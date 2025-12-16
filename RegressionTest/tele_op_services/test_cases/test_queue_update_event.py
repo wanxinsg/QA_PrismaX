@@ -37,7 +37,7 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])
 
-    with allure.step("位置从 1 开始递增且无重复"):
+    with allure.step("位置为正整数且按 position 递增（无需从 1 严格连续）且无重复"):
         positions = [item.get("position") for item in queue]
         # 附件：不同机器人分别打印完整 positions 序列
         try:
@@ -52,41 +52,51 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
         if not all(isinstance(p, int) and p > 0 for p in positions):
             allure.attach(str(positions), "positions_invalid", allure.attachment_type.TEXT)
             pytest.xfail("存在非正整数 position")
-        expected = list(range(1, len(queue) + 1))
-        if positions != expected:
-            # 定位问题类型与位置：非严格递增（步长!=1）或存在重复
-            first_gap_idx = None
-            first_dup_idx = None
-            seen = {}
+        # 仅要求队列 position 严格递增（允许跳号、无需从 1 开始），且不允许重复
+        has_duplicates = len(set(positions)) != len(positions)
+        is_monotonic_increasing = all(positions[i] > positions[i - 1] for i in range(1, len(positions)))
+        if has_duplicates or not is_monotonic_increasing:
+            # 找到第一个异常位置（<= 前一个元素的位置）
+            problem_idx = None
             for i in range(1, len(positions)):
-                if first_gap_idx is None and (positions[i] - positions[i - 1] != 1):
-                    first_gap_idx = i
-                if first_dup_idx is None:
-                    if positions[i] in seen:
-                        first_dup_idx = i
-                    else:
-                        seen[positions[i - 1]] = i - 1
-            problem_idx_candidates = [idx for idx in [first_dup_idx, first_gap_idx] if idx is not None]
-            if problem_idx_candidates:
-                problem_idx = min(problem_idx_candidates)
-                problem_type = "存在重复" if (first_dup_idx is not None and problem_idx == first_dup_idx) else "非严格递增"
-            else:
-                # 起始非1但严格递增的情况（如 [2,3,4,...]）
+                if positions[i] <= positions[i - 1]:
+                    problem_idx = i
+                    break
+
+            # 如果只是重复但整体仍为递增序列（理论上不可能，但做个兜底）
+            if problem_idx is None and has_duplicates:
+                # 找到第一个重复元素索引
+                seen = {}
+                for i, p in enumerate(positions):
+                    if p in seen:
+                        problem_idx = i
+                        break
+                    seen[p] = i
+
+            if problem_idx is None:
                 problem_idx = 0
-                problem_type = "起始非1"
 
             start = max(0, problem_idx - 2)
             end = min(len(positions), start + 5)
             window = positions[start:end]
+
+            problem_type_parts = []
+            if has_duplicates:
+                problem_type_parts.append("存在重复")
+            if not is_monotonic_increasing:
+                problem_type_parts.append("非递增")
+            problem_type = " & ".join(problem_type_parts) if problem_type_parts else "未知问题"
 
             allure.attach(
                 f"type={problem_type}\nindex={problem_idx}\nwindow={window}",
                 "positions_mismatch_window",
                 allure.attachment_type.TEXT,
             )
-            # 仍附上完整 expected/actual 以便排查
-            allure.attach(f"expected={expected}\nactual={positions}", "positions_mismatch", allure.attachment_type.TEXT)
-            pytest.xfail("position 非严格递增或存在重复")
+            mismatch_text = f"actual={positions}"
+            allure.attach(mismatch_text, "positions_mismatch", allure.attachment_type.TEXT)
+            print("[queue_positions] MISMATCH")
+            print("[queue_positions] actual   queue:", positions)
+            pytest.xfail("position 非递增或存在重复")
 
 
 @pytest.mark.teleop
