@@ -88,7 +88,7 @@ def test_get_robots_streamid(api_client):
     expected_streams = {
         "arm1": "YfYeCJjdBqE",
         "arm2": "ui-aIXF36Xg",
-        "arm3": "sp4Izv7NvAU",
+        "arm3": "Z1gM5Y834C8",
     }
 
     with allure.step("Validate each robot.youtube_stream_id matches expected value"):
