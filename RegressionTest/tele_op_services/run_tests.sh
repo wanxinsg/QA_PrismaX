@@ -8,7 +8,13 @@ set -euo pipefail
 # - 运行 pytest + 生成 Allure 报告
 ##############################################
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 兼容 cron/sh：BASH_SOURCE 可能没有定义
+if [[ -n "${BASH_SOURCE-}" ]]; then
+  SCRIPT_PATH="${BASH_SOURCE[0]}"
+else
+  SCRIPT_PATH="$0"
+fi
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 BACKEND_DIR="/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
 TEST_DIR="$SCRIPT_DIR"
 ALLURE_RESULTS_DIR="$TEST_DIR/test_report/allure-results"
@@ -227,6 +233,46 @@ if not smtp_user or not smtp_pass:
 def summarize_results(base_dir: str):
     if not base_dir or not os.path.isdir(base_dir):
         return "No results found.", {}
+
+    def _extract_queue_mismatch(result_dir: str, data: dict):
+        """Extract expected/actual queue sequences from Allure attachment for test_queue_positions xfail."""
+        name = (data.get("name") or data.get("fullName") or "").lower()
+        if "test_queue_positions" not in name:
+            return None
+
+        # Collect attachments from both top-level and step-level, because Allure
+        # stores our "positions_mismatch" attachment under the step.
+        attachments = list(data.get("attachments") or [])
+        for step in data.get("steps") or []:
+            for att in step.get("attachments") or []:
+                attachments.append(att)
+        for att in attachments:
+            if att.get("name") != "positions_mismatch":
+                continue
+            source = att.get("source")
+            if not source:
+                continue
+            path = os.path.join(result_dir, source)
+            try:
+                txt = open(path, "r", encoding="utf-8").read().strip()
+            except Exception:
+                continue
+            exp = act = None
+            for line in txt.splitlines():
+                l = line.strip()
+                if l.startswith("expected="):
+                    exp = l[len("expected=") :]
+                elif l.startswith("actual="):
+                    act = l[len("actual=") :]
+            lines = ["[queue_positions] MISMATCH"]
+            if exp is not None and act is not None:
+                lines.append(f"[queue_positions] expected queue: {exp}")
+                lines.append(f"[queue_positions] actual   queue: {act}")
+            else:
+                lines.append("[queue_positions] raw attachment:")
+                lines.extend(txt.splitlines())
+            return "\n".join(lines)
+        return None
     entries = [os.path.join(base_dir, d) for d in os.listdir(base_dir)]
     subdirs = [d for d in entries if os.path.isdir(d)]
     if not subdirs:
@@ -236,6 +282,7 @@ def summarize_results(base_dir: str):
     failures = []
     xfails = []
     skips = []
+    queue_position_xfails = []
     all_cases = []  # track every test case: name + status + message
     for d in sorted(subdirs):
         suite = os.path.basename(d) if d != base_dir else "all"
@@ -271,6 +318,11 @@ def summarize_results(base_dir: str):
                 else:
                     counts["skipped"] += 1
                     skips.append(f"- {name}: {message or 'skipped'}")
+            # 如果是队列位置相关的 xfail，用附件中的 positions_mismatch 补充 expected/actual 序列
+            if normalized_status == "xfailed":
+                detail = _extract_queue_mismatch(d, data)
+                if detail:
+                    queue_position_xfails.append(detail)
             # record every case for detailed section
             all_cases.append(
                 {
@@ -298,6 +350,11 @@ def summarize_results(base_dir: str):
         text_lines.append("Xfails (expected failures):")
         text_lines.extend(xfails[:50])
         text_lines.append("")
+    if queue_position_xfails:
+        text_lines.append("Queue position xfail details:")
+        for q in queue_position_xfails:
+            text_lines.append(q)
+            text_lines.append("")
     if failures:
         text_lines.append("Failures:")
         text_lines.extend(failures[:50])
@@ -329,6 +386,14 @@ def summarize_results(base_dir: str):
         for x in xfails[:50]:
             html.append(f"<li><code>{x}</code></li>")
         html.append("</ul></div>")
+    if queue_position_xfails:
+        html.append("<div style=\"margin:10px 0;\"><b>Queue position xfail details:</b>")
+        for q in queue_position_xfails:
+            esc = q.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            html.append("<pre style=\"margin:4px 0 0 0; padding:6px 8px; background:#f5f5f5; border-radius:4px;\">")
+            html.append(esc)
+            html.append("</pre>")
+        html.append("</div>")
     if failures:
         html.append("<div style=\"margin:10px 0;\"><b>Failures:</b><ul style=\"margin:6px 0 0 18px;\">")
         for f in failures[:50]:
