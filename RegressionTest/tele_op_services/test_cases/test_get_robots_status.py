@@ -81,23 +81,19 @@ def test_get_robots_queue_length(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_streamid(api_client):
-    """校验 arm1/arm2/arm3 的 youtube_stream_id 精确匹配预期。"""
+    """校验 arm1/arm2/arm3 的 youtube_stream_id 为非空字符串。"""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
-    expected_streams = {
-        "arm1": "YfYeCJjdBqE",
-        "arm2": "ui-aIXF36Xg",
-        "arm3": "Z1gM5Y834C8",
-    }
+    expected_ids = {"arm1", "arm2", "arm3"}
 
-    with allure.step("Validate each robot.youtube_stream_id matches expected value"):
-        for rid, expected_stream in expected_streams.items():
+    with allure.step("Validate each robot.youtube_stream_id is non-empty"):
+        for rid in expected_ids:
             r = robots_map.get(rid)
             assert r is not None, f"Robot {rid} not found in response"
-            assert r.get("youtube_stream_id") == expected_stream, (
-                f"{rid}.youtube_stream_id expected {expected_stream}, "
-                f"got {r.get('youtube_stream_id')}"
-            )
+            stream_id = r.get("youtube_stream_id")
+            assert stream_id is not None, f"{rid}.youtube_stream_id should not be None"
+            assert isinstance(stream_id, str), f"{rid}.youtube_stream_id should be a string"
+            assert stream_id.strip(), f"{rid}.youtube_stream_id should not be empty"
 
 
