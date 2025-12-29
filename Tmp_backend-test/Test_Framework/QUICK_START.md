@@ -6,7 +6,7 @@
 
 ```bash
 # 进入测试框架目录
-cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/backend-test/Test_Framework
+cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/Tmp_backend-test/Test_Framework
 
 # 1. 首次使用：安装依赖
 ./run_tests.sh --install
@@ -40,7 +40,7 @@ cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/backend-test/Test_F
 
 ```bash
 # 进入测试框架目录
-cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/backend-test/Test_Framework
+cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/Tmp_backend-test/Test_Framework
 
 # 1. 运行所有测试
 pytest
@@ -262,7 +262,7 @@ pytest --durations=0
 
 ```bash
 # 1. 进入目录
-cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/backend-test/Test_Framework
+cd /Users/wanxin/PycharmProjects/Knowlege_PrismaX/QA_PrismaX/Tmp_backend-test/Test_Framework
 
 # 2. 安装依赖
 ./run_tests.sh --install
