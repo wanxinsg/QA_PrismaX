@@ -39,7 +39,7 @@ cd /Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele
 2) 安装测试依赖：
 
 ```bash
-pip install -r QA_PrismaX/QA_Test/requirements.txt
+pip install -r QA_PrismaX/QA_Env_Auto_Test/requirements.txt
 ```
 
 3) 配置环境变量（必须提供用户授权信息，需与后端 DB 一致）：
@@ -62,13 +62,13 @@ export TELE_BASE=
 ## 运行测试与生成 Allure 报告
 
 ```bash
-pytest -q QA_PrismaX/QA_Test --alluredir=QA_PrismaX/QA_Test/test_report/allure-results
+pytest -q QA_PrismaX/QA_Env_Auto_Test --alluredir=QA_PrismaX/QA_Env_Auto_Test/test_report/allure-results
 ```
 
 生成可视化报告：
 
 ```bash
-allure serve QA_PrismaX/QA_Test/test_report/allure-results
+allure serve QA_PrismaX/QA_Env_Auto_Test/test_report/allure-results
 ```
 
 ## 覆盖范围
