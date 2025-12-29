@@ -131,7 +131,7 @@ run_pytest() {
   set +e
   TELE_HOST="$TELE_HOST" TELE_PORT="$TELE_PORT" TELE_SCHEME="$TELE_SCHEME" TELE_BASE="$TELE_BASE" \
   ROBOT_ID="$ROBOT_ID" USER_ID="$USER_ID" TOKEN="$TOKEN" \
-    pytest -q "$TEST_DIR/test_cases"
+    pytest -q --alluredir="$ALLURE_RESULTS_DIR" "$TEST_DIR/test_cases"
   PYTEST_EXIT_CODE=$?
   set -e
 

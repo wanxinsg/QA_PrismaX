@@ -17,9 +17,10 @@ class HttpClient:
     - Structured logging of request and response details
     """
 
-    def __init__(self, config: TeleOpConfig, logger=None) -> None:
+    def __init__(self, config: TeleOpConfig, logger=None, timeout: float = 3.0) -> None:
         self.config = config
         self.log = logger or get_logger(__name__)
+        self.timeout = timeout
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -66,6 +67,10 @@ class HttpClient:
         url = self._build_url(path)
         headers = self._prepare_headers(kwargs.pop("headers", None))
         kwargs["headers"] = headers
+        
+        # Set default timeout if not provided
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = self.timeout
 
         self._log_request(method, url, **kwargs)
         response = requests.request(method=method, url=url, **kwargs)
