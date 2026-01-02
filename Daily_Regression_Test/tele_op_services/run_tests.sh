@@ -71,10 +71,10 @@ start_backend_if_needed() {
   # 如果有进程占用该端口，先尝试杀掉（需要 lsof）
   if command -v lsof >/dev/null 2>&1; then
     local pids
-    pids="$(lsof -ti tcp:\"$TELE_PORT\" || true)"
+    pids="$(lsof -ti :\"$TELE_PORT\" 2>/dev/null || true)"
     if [ -n "$pids" ]; then
       print_warn "Killing existing process(es) on port ${TELE_PORT}: $pids"
-      echo "$pids" | xargs -r kill -9 || true
+      echo "$pids" | xargs kill -9 2>/dev/null || true
     fi
   fi
 
@@ -162,10 +162,10 @@ generate_allure_report() {
   # 如果端口已被占用，尝试释放
   if command -v lsof >/dev/null 2>&1; then
     local pids
-    pids="$(lsof -ti tcp:\"$port\" || true)"
+    pids="$(lsof -ti :\"$port\" 2>/dev/null || true)"
     if [ -n "$pids" ]; then
       print_warn "Killing existing process(es) on port ${port}: $pids"
-      echo "$pids" | xargs -r kill -9 || true
+      echo "$pids" | xargs kill -9 2>/dev/null || true
     fi
   fi
 
