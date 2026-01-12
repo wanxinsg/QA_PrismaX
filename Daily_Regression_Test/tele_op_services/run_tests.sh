@@ -6,6 +6,11 @@ set -euo pipefail
 # - 启动/检测 Tele-Op 本地服务
 # - 创建并使用本目录的测试虚拟环境
 # - 运行 pytest + 生成 Allure 报告
+#
+# 可用工具函数:
+#   print_queue_positions [robot_ids...]
+#     打印指定机器人的队列位置
+#     示例: print_queue_positions arm1 arm2
 ##############################################
 
 # 兼容 cron/sh：BASH_SOURCE 可能没有定义
@@ -38,6 +43,32 @@ print_info() { echo "[INFO]  $1"; }
 print_warn() { echo "[WARN]  $1"; }
 print_err()  { echo "[ERROR] $1" >&2; }
 
+print_queue_positions() {
+  # 打印当前队列位置的工具函数
+  # 使用方式: print_queue_positions [robot_ids...]
+  # 示例: print_queue_positions arm1 arm2 arm3
+  local robot_ids="${*:-arm1 arm2 arm3}"
+  print_info "Fetching queue positions for: $robot_ids"
+  
+  if [ ! -f "$TEST_DIR/test_cases/print_queue_positions.py" ]; then
+    print_warn "print_queue_positions.py not found at $TEST_DIR/test_cases/"
+    return 1
+  fi
+  
+  # 使用测试环境的 Python 运行队列位置查询工具
+  if [ -f "$TEST_DIR/.venv/bin/python" ]; then
+    "$TEST_DIR/.venv/bin/python" "$TEST_DIR/test_cases/print_queue_positions.py" \
+      --host "$TELE_HOST" \
+      --port "$TELE_PORT" \
+      --user-id "$USER_ID" \
+      --token "$TOKEN" \
+      --robot-ids $robot_ids
+  else
+    print_warn "Test virtualenv not found. Please run ensure_test_venv first."
+    return 1
+  fi
+}
+
 wait_for_backend() {
   local host="$1"
   local port="$2"
@@ -47,20 +78,24 @@ wait_for_backend() {
   local start_ts
   start_ts="$(date +%s)"
   while true; do
-    # 只要能连通就认为服务已就绪（不强制 200）
+    # 检查服务是否返回 200 状态码（确保服务真正就绪，而不只是端口开放）
     local code
-    code="$(curl -s -m 2 -o /dev/null -w "%{http_code}" "$url" || echo "000")"
-    if [[ "$code" != "000" ]]; then
-      print_info "Backend is up (HTTP $code)."
+    code="$(curl -s -m 3 -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")"
+    if [[ "$code" == "200" ]]; then
+      print_info "Backend is up and ready (HTTP $code)."
       return 0
     fi
     local now_ts
     now_ts="$(date +%s)"
     if (( now_ts - start_ts >= max_wait )); then
-      print_err "Backend did not become ready within ${max_wait}s."
+      print_err "Backend did not become ready within ${max_wait}s. Last HTTP code: $code"
       return 1
     fi
-    sleep 1
+    # 显示进度
+    if (( (now_ts - start_ts) % 10 == 0 )); then
+      print_info "Still waiting... (${now_ts} - ${start_ts} = $((now_ts - start_ts))s elapsed, last code: $code)"
+    fi
+    sleep 2
   done
 }
 
@@ -75,27 +110,45 @@ start_backend_if_needed() {
     if [ -n "$pids" ]; then
       print_warn "Killing existing process(es) on port ${TELE_PORT}: $pids"
       echo "$pids" | xargs kill -9 2>/dev/null || true
+      # 等待进程真正退出
+      sleep 2
     fi
   fi
 
   print_info "Starting Tele-Op backend in background... (logs: $BACKEND_LOG)"
   mkdir -p "$(dirname "$BACKEND_LOG")"
 
-  # 使用后端自己的虚拟环境启动 app.py
-  nohup bash -lc "cd \"$BACKEND_DIR\" && \
-    source .venv/bin/activate && \
-    TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai \
-    GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json \
-    PORT=\"$TELE_PORT\" python app.py" \
-    >"$BACKEND_LOG" 2>&1 &
+  # 检查后端虚拟环境是否存在
+  if [ ! -f "$BACKEND_DIR/.venv/bin/activate" ]; then
+    print_err "Backend virtualenv not found at $BACKEND_DIR/.venv"
+    print_err "Please run: cd $BACKEND_DIR && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
+    return 1
+  fi
 
-  # 等待最多 90 秒让服务起来
+  # 使用后端自己的虚拟环境启动 app.py (不使用 bash -lc 避免环境变量问题)
+  cd "$BACKEND_DIR"
+  export TEST_MODE=true
+  export GOOGLE_CLOUD_PROJECT=thepinai
+  export GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json
+  export PORT="$TELE_PORT"
+  
+  nohup "$BACKEND_DIR/.venv/bin/python" app.py \
+    >"$BACKEND_LOG" 2>&1 &
+  local backend_pid=$!
+  print_info "Backend started with PID: $backend_pid"
+
+  # 等待最多 120 秒让服务起来（数据库初始化可能需要更多时间）
   set +e
-  wait_for_backend "$TELE_HOST" "$TELE_PORT" 90
+  wait_for_backend "$TELE_HOST" "$TELE_PORT" 120
   local rc=$?
   set -e
   if (( rc != 0 )); then
-    print_warn "Backend may not be ready; tests might fail to connect."
+    print_err "Backend did not start successfully. Check logs at: $BACKEND_LOG"
+    if [ -f "$BACKEND_LOG" ]; then
+      print_err "Last 20 lines of backend log:"
+      tail -n 20 "$BACKEND_LOG" >&2
+    fi
+    return 1
   fi
 }
 
@@ -450,7 +503,13 @@ PY
 
 main() {
   print_info "== Tele-Op Backend Regression Test Runner =="
-  start_backend_if_needed
+  
+  # 启动后端服务，如果失败则退出
+  if ! start_backend_if_needed; then
+    print_err "Failed to start backend service. Aborting tests."
+    exit 1
+  fi
+  
   ensure_test_venv
   run_pytest
   generate_allure_report
