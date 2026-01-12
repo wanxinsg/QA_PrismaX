@@ -1,0 +1,18 @@
+# Log files
+*.log
+logs/
+*.log.*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test reports
+test_report/
+allure-report/
+allure-results/
+
+# Pytest cache
+.pytest_cache/
+

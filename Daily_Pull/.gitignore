@@ -1,0 +1,30 @@
+# Log files
+*.log
+logs/
+*.log.*
+
+# Daily Pull logs
+daily_pull.log
+
+# Environment config (may contain sensitive info)
+# Uncomment the line below if you don't want to track daily_pull_env.sh
+# daily_pull_env.sh
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test reports
+test_report/
+allure-report/
+allure-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+

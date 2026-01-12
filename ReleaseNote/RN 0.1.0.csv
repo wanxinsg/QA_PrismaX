@@ -1,0 +1,22 @@
+Issue Type, Key, Summary, Status, Comments, Sprint, Assignee, Due date, Labels, Created, Updated, Reporter
+Task, PRIS-83, distribute marketing promotional emails to all users with an email address with us, QA Varified, 3, PRIS Sprint 11, Aparna Rangamani,   ,   , 2025-11-30, 2025-12-16, Jason Wu
+Bug, PRIS-73, Some Improvements for Mini APP on BASE, QA Varified, 2, PRIS Sprint 11, chris,   ,   , 2025-11-25, 2025-12-19, Wanxin
+Task, PRIS-55, Get request use cloud flare to cache, QA Varified, 5, PRIS Sprint 11, Aparna Rangamani, 2025-12-26,   , 2025-10-28, 2025-12-30, chris
+Bug, PRIS-40, Prismax admin portal cannot use phantom wallet to login., QA Varified, 2, PRIS Sprint 11, Aparna Rangamani, 2025-12-23,   , 2025-10-07, 2025-12-24, Wanxin
+Task, PRIS-56, make metamask wallet available over Solana network as well, QA Varified, 1, PRIS Sprint 11, chris,   ,   , 2025-10-29, 2025-12-22, Jason Wu
+Bug, PRIS-78, prismax total_points calculation logic, QA Varified, 3, PRIS Sprint 11, chris,   ,   , 2025-11-27, 2025-12-11, Wanxin
+Task, PRIS-82, Admin Portol:Break down No. of members by chains and email, QA Varified, 2, PRIS Sprint 11, Aparna Rangamani, 2025-12-23,   , 2025-11-30, 2025-12-24, Jason Wu
+Task, PRIS-93, Change the flow to redirect users to Innovator membership when they click to control the Buddy Arm, QA Varified, 1, PRIS Sprint 11, chris, 2025-12-23,   , 2025-12-19, 2025-12-23, Jason Wu
+Bug, PRIS-90, Sometimes it took a long time to start youtube streaming when user gets turns to start teleops, demo, 5, PRIS Sprint 11, chris,   ,   , 2025-12-16, 2026-01-08, Wanxin
+Bug, PRIS-91, Investigate the root cause for the duplicated queue position in production env., QA Varified, 2, PRIS Sprint 11, chris,   ,   , 2025-12-16, 2026-01-07, Wanxin
+Task, PRIS-95, Write instructions to  restart the arm, QA Varified, 2, PRIS Sprint 11, chris, 2025-12-22,   , 2025-12-23, 2026-01-06, chris
+Task, PRIS-96, stop the leaderboard update for Monad on Dec 25th, 24:00, QA Varified,   , PRIS Sprint 11, chris,   ,   , 2025-12-23, 2025-12-31, Jason Wu
+Bug, PRIS-97, payment and membership mismatch, QA Varified, 3, PRIS Sprint 11, Aparna Rangamani, 2026-01-06,   , 2025-12-24, 2026-01-06, Jason Wu
+Task, PRIS-98, add monad chain to the payment records verification table over Admin portal, QA Varified, 3, PRIS Sprint 11, Aparna Rangamani, 2026-01-06,   , 2025-12-24, 2026-01-06, Jason Wu
+Task, PRIS-102, Review API security:  API list check - authorization, demo, 3, PRIS Sprint 11, Aparna Rangamani,   ,   , 2025-12-31, 2026-01-08, Wanxin
+Task, PRIS-103, User Feedback: After logging in, a URL like /email?token=XXXX appears in the address bar, Done, 2, PRIS Sprint 11, chris,   ,   , 2026-01-02, 2026-01-06, Wanxin
+Bug, PRIS-71, for Monad Chain, Metamask wallet cannot be connected correctly., In Progress, 1, PRIS Sprint 11, Wanxin,   ,   , 2025-11-25, 2026-01-06, Wanxin
+Task, PRIS-104, write summary for marketing team of sprint release features change description, To Do,   , PRIS Sprint 11, Wanxin,   ,   , 2026-01-03, 2026-01-05, Jason Wu
+Task, PRIS-105, Training Arm movement limitation needs to be adjust, QA Varified, 2, PRIS Sprint 11, chris,   ,   , 2026-01-05, 2026-01-07, Wanxin
+Bug, PRIS-108, Total Points did not include "New user initial points", Done, 1, PRIS Sprint 11, chris,   ,   , 2026-01-07, 2026-01-08, Wanxin
+Bug, PRIS-109, Red dot is missing from the tab header when user queue within first 3, To Do, 4, PRIS Sprint 11, chris,   ,   , 2026-01-07, 2026-01-08, Wanxin
