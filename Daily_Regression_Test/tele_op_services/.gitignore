@@ -8,6 +8,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+
 # Test reports
 test_report/
 allure-report/
