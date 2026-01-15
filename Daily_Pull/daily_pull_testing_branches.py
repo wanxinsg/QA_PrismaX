@@ -43,6 +43,7 @@ class GitPullResult:
         self.commit_date = ""
         self.pulled = False
         self.changes_summary = ""
+        self.commit_list = []  # 存储提交列表（commit hash和message）
 
     def __str__(self):
         status = "✅ 成功" if self.success else "❌ 失败"
@@ -168,6 +169,20 @@ def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
             if success and diff_summary:
                 commits = diff_summary.split("\n")
                 result.changes_summary = f"更新了 {len(commits)} 个提交"
+                # 存储每个提交的详细信息（hash和message）
+                for commit_line in commits:
+                    if commit_line.strip():
+                        parts = commit_line.split(" ", 1)
+                        if len(parts) >= 2:
+                            result.commit_list.append({
+                                "hash": parts[0],
+                                "message": parts[1]
+                            })
+                        else:
+                            result.commit_list.append({
+                                "hash": parts[0],
+                                "message": ""
+                            })
             else:
                 result.changes_summary = "有更新"
         else:
@@ -242,6 +257,20 @@ def send_email_report(results: List[GitPullResult]):
                 <div class="info"><span class="label">分支:</span> {result.branch}</div>
                 <div class="info"><span class="label">状态:</span> {result.changes_summary}</div>
             """
+            
+            # 如果有更新的提交列表，显示每个提交
+            if result.commit_list:
+                html_body += """
+                <div class="info"><span class="label">提交列表:</span></div>
+                <ul style="margin: 5px 0; padding-left: 30px;">
+                """
+                for commit in result.commit_list:
+                    html_body += f"""
+                    <li style="margin: 3px 0;"><code style="background: #e8e8e8; padding: 2px 4px; border-radius: 2px;">{commit['hash']}</code> {commit['message']}</li>
+                    """
+                html_body += """
+                </ul>
+                """
             
             if result.latest_commit:
                 html_body += f"""

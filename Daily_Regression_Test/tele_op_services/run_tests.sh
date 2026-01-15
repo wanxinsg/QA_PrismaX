@@ -102,6 +102,10 @@ wait_for_backend() {
 start_backend_if_needed() {
   # 每次运行前强制从后端目录启动一次服务
   print_info "Forcing Tele-Op backend restart on port ${TELE_PORT}..."
+  
+  # 保存当前目录，以便函数结束时恢复
+  local original_dir
+  original_dir="$(pwd)"
 
   # 如果有进程占用该端口，先尝试杀掉（需要 lsof）
   if command -v lsof >/dev/null 2>&1; then
@@ -122,6 +126,7 @@ start_backend_if_needed() {
   if [ ! -f "$BACKEND_DIR/.venv/bin/activate" ]; then
     print_err "Backend virtualenv not found at $BACKEND_DIR/.venv"
     print_err "Please run: cd $BACKEND_DIR && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
+    cd "$original_dir"  # 恢复原目录
     return 1
   fi
 
@@ -148,8 +153,12 @@ start_backend_if_needed() {
       print_err "Last 20 lines of backend log:"
       tail -n 20 "$BACKEND_LOG" >&2
     fi
+    cd "$original_dir"  # 即使失败也恢复原目录
     return 1
   fi
+  
+  # 成功后恢复到原目录
+  cd "$original_dir"
 }
 
 ensure_test_venv() {
