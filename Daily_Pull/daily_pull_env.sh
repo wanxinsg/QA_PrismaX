@@ -19,7 +19,7 @@ export SMTP_PASS="${SMTP_PASS:-your_password}"
 # 邮件发送配置
 export EMAIL_FROM="${EMAIL_FROM:-${SMTP_USER}}"
 export EMAIL_TO="${EMAIL_TO:-wanxin@solidcap.io}"
-export EMAIL_SUBJECT="${EMAIL_SUBJECT:-Prismax Daily Testing Branches Pull Report}"
+export EMAIL_SUBJECT="${EMAIL_SUBJECT:-Prismax testing分支每日拉取报告}"
 
 # 项目根目录（可选，默认自动检测）
 # export PROJECT_ROOT="/Users/wanxin/PycharmProjects/Prismax"

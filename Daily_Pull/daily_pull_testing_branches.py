@@ -13,7 +13,7 @@
     SMTP_PASS - SMTP密码
     EMAIL_FROM - 发件人邮箱 (默认: SMTP_USER)
     EMAIL_TO - 收件人邮箱 (默认: wanxin@solidcap.io)
-    EMAIL_SUBJECT - 邮件主题 (默认: Prismax Daily Testing Branches Pull Report)
+    EMAIL_SUBJECT - 邮件主题 (默认: Prismax testing分支每日拉取报告)
     PROJECT_ROOT - 项目根目录 (默认: 脚本所在目录的父目录)
 """
 
@@ -201,7 +201,7 @@ def send_email_report(results: List[GitPullResult]):
     smtp_pass = os.environ.get("SMTP_PASS", "")
     email_to = os.environ.get("EMAIL_TO", "wanxin@solidcap.io")
     email_from = os.environ.get("EMAIL_FROM", smtp_user)
-    subject = os.environ.get("EMAIL_SUBJECT", "Prismax Daily Testing Branches Pull Report")
+    subject = os.environ.get("EMAIL_SUBJECT", "Prismax testing分支每日拉取报告")
     
     if not smtp_user or not smtp_pass:
         print("⚠️  SMTP_USER/SMTP_PASS 未设置，跳过邮件发送")

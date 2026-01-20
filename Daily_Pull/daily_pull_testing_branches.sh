@@ -13,7 +13,7 @@
 #   export SMTP_PASS=your_password
 #   export EMAIL_FROM=your_email@example.com
 #   export EMAIL_TO=wanxin@solidcap.io
-#   export EMAIL_SUBJECT="Prismax Daily Testing Branches Pull Report"
+#   export EMAIL_SUBJECT="Prismax testing分支每日拉取报告"
 #   export PROJECT_ROOT=/path/to/Prismax
 #
 
