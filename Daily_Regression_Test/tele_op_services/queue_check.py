@@ -109,12 +109,20 @@ def main() -> None:
 
     @sio.on("queue_update")
     def on_queue_update(data):
-        # 队列状态变更事件，打印当前队列信息（JSON）
+        # 队列状态变更事件，提取并打印 position 序列
         try:
-            pretty = json.dumps(data, ensure_ascii=False)
-        except Exception:
-            pretty = str(data)
-        print(f"[queue_update] {pretty}")
+            # 如果 data 是字典且包含队列信息
+            if isinstance(data, dict) and "queue" in data:
+                queue_list = data["queue"]
+                # 提取所有用户的 position
+                positions = [user.get("position") for user in queue_list if isinstance(user, dict)]
+                print(f"[queue_update] Position序列 (共{len(positions)}人): {positions}")
+            else:
+                # 如果数据结构不是预期的，打印完整数据
+                pretty = json.dumps(data, ensure_ascii=False)
+                print(f"[queue_update] {pretty}")
+        except Exception as e:
+            print(f"[queue_update] 解析错误: {e}, 原始数据: {str(data)[:200]}")
 
     try:
         # 连接到 Socket.IO 服务

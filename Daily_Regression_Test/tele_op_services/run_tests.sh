@@ -259,7 +259,7 @@ send_email_summary() {
   local smtp_pass="${SMTP_PASS:-}"
   local email_to="${EMAIL_TO:-wanxin@solidcap.io}"
   local email_from="${EMAIL_FROM:-$smtp_user}"
-  local subject="${EMAIL_SUBJECT:-Tele-Op Daily Regression Summary}"
+  local subject="${EMAIL_SUBJECT:-Prismax daily regression Summary}"
   local report_url="http://localhost:${ALLURE_PORT:-9999}"
 
   if [ -z "$smtp_user" ] || [ -z "$smtp_pass" ]; then
@@ -285,7 +285,7 @@ smtp_user = os.environ.get("SMTP_USER", "")
 smtp_pass = os.environ.get("SMTP_PASS", "")
 email_to = os.environ.get("EMAIL_TO", "wanxin@solidcap.io")
 email_from = os.environ.get("EMAIL_FROM", smtp_user)
-subject = os.environ.get("EMAIL_SUBJECT", "Tele-Op Daily Regression Summary")
+subject = os.environ.get("EMAIL_SUBJECT", "Prismax daily regression Summary")
 results_base = os.environ.get("RESULTS_BASE", "")
 report_url = os.environ.get("REPORT_URL", "http://localhost:9999")
 
