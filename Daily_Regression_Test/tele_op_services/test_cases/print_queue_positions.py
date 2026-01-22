@@ -2,7 +2,7 @@
 """打印当前队列的 position number list。
 
 通过 Socket.IO 连接获取一次队列更新，然后打印所有的 position numbers。
-默认会打印 arm1、arm2 和 arm3 三个机器人的队列情况。
+默认会打印 arm1、arm2、arm3 和 arm4 四个机器人的队列情况。
 
 使用示例:
   python print_queue_positions.py --host 127.0.0.1 --port 8081 \
@@ -135,8 +135,8 @@ def main() -> None:
     parser.add_argument(
         "--robot-ids",
         nargs="+",
-        default=["arm1", "arm2", "arm3"],
-        help="Robot IDs to query (default: arm1 arm2 arm3)"
+        default=["arm1", "arm2", "arm3", "arm4"],
+        help="Robot IDs to query (default: arm1 arm2 arm3 arm4)"
     )
     parser.add_argument(
         "--user-id",

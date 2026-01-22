@@ -35,7 +35,7 @@ TELE_BASE="${TELE_BASE:-}"
 ROBOT_ID="${ROBOT_ID:-arm1}"
 # 默认使用经过验证的 Tele-Op 队列用户，用于日常回归
 USER_ID="${USER_ID:-1073381}"
-TOKEN="${TOKEN:-HZjIrBDYYlDZ2p2hyzj6P4B9HeMKyIGl5lwp3sdorDg}"
+TOKEN="${TOKEN:-5O01l-iffPoW1iACtLaYCI5w6u1KTvOquQaIfE5jZdU}"
 
 PYTEST_EXIT_CODE=0
 
@@ -46,8 +46,8 @@ print_err()  { echo "[ERROR] $1" >&2; }
 print_queue_positions() {
   # 打印当前队列位置的工具函数
   # 使用方式: print_queue_positions [robot_ids...]
-  # 示例: print_queue_positions arm1 arm2 arm3
-  local robot_ids="${*:-arm1 arm2 arm3}"
+  # 示例: print_queue_positions arm1 arm2 arm3 arm4
+  local robot_ids="${*:-arm1 arm2 arm3 arm4}"
   print_info "Fetching queue positions for: $robot_ids"
   
   if [ ! -f "$TEST_DIR/test_cases/print_queue_positions.py" ]; then

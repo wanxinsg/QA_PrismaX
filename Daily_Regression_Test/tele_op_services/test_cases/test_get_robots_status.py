@@ -43,13 +43,13 @@ def test_get_robots_status_code(api_client, config):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_id_list(api_client):
-    """校验返回的 robot_id 集合必须正好是 {arm1, arm2, arm3}。"""
+    """校验返回的 robot_id 集合必须正好是 {arm1, arm2, arm3, arm4}。"""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
-    expected_ids = {"arm1", "arm2", "arm3"}
+    expected_ids = {"arm1", "arm2", "arm3", "arm4"}
 
-    with allure.step("Validate robots set equals {arm1, arm2, arm3}"):
+    with allure.step("Validate robots set equals {arm1, arm2, arm3, arm4}"):
         assert set(robots_map.keys()) == expected_ids, (
             f"Expected robots {expected_ids}, got {set(robots_map.keys())}"
         )
@@ -61,11 +61,11 @@ def test_get_robots_id_list(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_queue_length(api_client):
-    """校验 arm1/arm2/arm3 的 queue_length 均不为 0。"""
+    """校验 arm1/arm2/arm3/arm4 的 queue_length 均不为 0。"""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
-    expected_ids = {"arm1", "arm2", "arm3"}
+    expected_ids = {"arm1", "arm2", "arm3", "arm4"}
 
     with allure.step("Validate each robot.queue_length is non-zero"):
         for rid in expected_ids:
@@ -81,11 +81,11 @@ def test_get_robots_queue_length(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_streamid(api_client):
-    """校验 arm1/arm2/arm3 的 youtube_stream_id 为非空字符串。"""
+    """校验 arm1/arm2/arm3/arm4 的 youtube_stream_id 为非空字符串。"""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
-    expected_ids = {"arm1", "arm2", "arm3"}
+    expected_ids = {"arm1", "arm2", "arm3", "arm4"}
 
     with allure.step("Validate each robot.youtube_stream_id is non-empty"):
         for rid in expected_ids:

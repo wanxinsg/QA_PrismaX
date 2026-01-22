@@ -20,7 +20,7 @@ class TeleOpConfig:
     robot_id: str = "arm1"
     # 默认使用经过验证的 Tele-Op 队列用户，用于日常回归
     user_id: str = "1073381"
-    token: str = "HZjIrBDYYlDZ2p2hyzj6P4B9HeMKyIGl5lwp3sdorDg"
+    token: str = "5O01l-iffPoW1iACtLaYCI5w6u1KTvOquQaIfE5jZdU"
 
     @property
     def base_url(self) -> str:
@@ -51,7 +51,7 @@ def load_config() -> TeleOpConfig:
     robot_id = os.getenv("ROBOT_ID", "arm1")
     # 如未显式指定，则回落到默认回归账号 1073381
     user_id = os.getenv("USER_ID", "1073381")
-    token = os.getenv("TOKEN", "HZjIrBDYYlDZ2p2hyzj6P4B9HeMKyIGl5lwp3sdorDg")
+    token = os.getenv("TOKEN", "5O01l-iffPoW1iACtLaYCI5w6u1KTvOquQaIfE5jZdU")
 
     return TeleOpConfig(
         scheme=scheme,
