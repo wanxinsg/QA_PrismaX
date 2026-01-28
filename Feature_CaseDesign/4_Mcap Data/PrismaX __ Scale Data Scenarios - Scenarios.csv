@@ -1,0 +1,26 @@
+Scenario,Type,Covers...,Details,Notes,Variations
+Laundry folding,Domestic,Soft objects,"The robot takes mixed laundry from a hamper, neatly folds it, and stacks it in piles according to type","- Ubiquitous scenario
+- Compact and easy to set up","- The items in the hamper
+- Introduce bulky items (jackets, etc)
+- Introduce other types of items (towels, sheets)"
+Dish organization,Domestic,General manipulation,The robot takes washed dishes from a sink and places them neatly in a dish rack to dry,,"- The type/number/color of each dish
+- Introduce other cookware (mugs, pots, pans)"
+Dishwasher unloading,Domestic,Large range of motion,The robot removes dry dishes from a dishwasher and neatly organizes them on a countertop or in a cabinet,"- Requires the robot to move down in Z to get items from the dishwasher, then move back up","- The type/number/color of each dish
+- Introduce other cookware (mugs, pots, pans)"
+Barcode scanning,Commercial,Object manipulation,The robot takes items from a bin or basket and scans the barcodes on them with a countertop barcode scanner,- Requires the robot examine each object to find the barcode,"- The items in the basket
+- The type of item (groceries, cosmetics, tools, ...)"
+Shelf restocking,Commercial,Large range of motion,The robot takes items from a mixed bin (containing multiples of each item) and sorts them into their labeled positions on a store shelf,- Requires the robot to read the label on the shelf and find the corresponding item in the bin,"- The items in the bin
+- The positions of each item on the shelves
+- Introducing bad items (which do not correspond to a label)"
+Fastener sorting,Industrial,"Small objects, object recognition",The robot takes fasteners or other small industrial parts from a bin of mixed parts and sorts them into labeled compartments in a parts organizer,- Requires the item to read the labels in the organizer and find the corresponding item through visual recognition only (the parts are not labeled),"- The items in the bin and the labels on the organizer
+- The positions of each compartment on the organizer
+- Introducing bad items (which do not correspond to a label)"
+SMD component sorting,Industrial,Object manipulation,The robot places spools of electronic components into labeled positions on a shelf,- Requires the robot to read the labels on each spool and match them with the labels on the shelf (the spools all look identical),"- The composition of the spools
+- The positions of each component type on the shelves
+- Damaged labels on spools (only partially readable)
+- Introducing bad items (which do not correspond to a label)"
+Electronic component repacking,Industrial,"Small objects, reasoning",The robot repackages bulk electronic components from their shipping trays into packages of the correct quantity to fulfill customer orders. The type of package (bag/partial tray) varies depending on the amount of items left in the bulk tray and the size of the order,- A complex reasoning task which requires the robot to understand numbers and reason through efficient use of parts,"- The type of component (and number of components per tray)
+- The order size
+- The sequence of orders (which changes the part allocation)"
+Block manipulation,Other,Dextrous manipulation,The robot builds various structures from toy wooden blocks without knocking the structures over,- A toy task which requires high levels of dexterity,"- The strucuture being built
+- The trace aborts when the structure falls, and the successful portions is collected for training"

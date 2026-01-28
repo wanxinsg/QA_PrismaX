@@ -19,7 +19,11 @@ export SMTP_PASS="${SMTP_PASS:-your_password}"
 # 邮件发送配置
 export EMAIL_FROM="${EMAIL_FROM:-${SMTP_USER}}"
 export EMAIL_TO="${EMAIL_TO:-wanxin@solidcap.io}"
-export EMAIL_SUBJECT="${EMAIL_SUBJECT:-Prismax testing分支每日拉取报告}"
+# NOTE:
+# - 这里强制为 daily pull 设置独立的标题变量，避免系统/其他任务里遗留的 EMAIL_SUBJECT 影响本任务
+# - 同时继续导出 EMAIL_SUBJECT 以兼容旧脚本/调用方式
+export DAILY_PULL_EMAIL_SUBJECT="${DAILY_PULL_EMAIL_SUBJECT:-PrismaX daily pull report}"
+export EMAIL_SUBJECT="$DAILY_PULL_EMAIL_SUBJECT"
 
 # 项目根目录（可选，默认自动检测）
 # export PROJECT_ROOT="/Users/wanxin/PycharmProjects/Prismax"

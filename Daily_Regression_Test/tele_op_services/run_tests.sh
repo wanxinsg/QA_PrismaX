@@ -259,7 +259,8 @@ send_email_summary() {
   local smtp_pass="${SMTP_PASS:-}"
   local email_to="${EMAIL_TO:-wanxin@solidcap.io}"
   local email_from="${EMAIL_FROM:-$smtp_user}"
-  local subject="${EMAIL_SUBJECT:-Prismax daily regression Summary}"
+  # NOTE: 使用专用环境变量，避免与其他 cron 任务共用 EMAIL_SUBJECT 造成标题串台
+  local subject="${TELEOP_REGRESSION_EMAIL_SUBJECT:-PrismaX Daily Regression Test}"
   local report_url="http://localhost:${ALLURE_PORT:-9999}"
 
   if [ -z "$smtp_user" ] || [ -z "$smtp_pass" ]; then

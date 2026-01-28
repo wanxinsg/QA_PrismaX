@@ -13,7 +13,7 @@
     SMTP_PASS - SMTP密码
     EMAIL_FROM - 发件人邮箱 (默认: SMTP_USER)
     EMAIL_TO - 收件人邮箱 (默认: wanxin@solidcap.io)
-    EMAIL_SUBJECT - 邮件主题 (默认: Prismax testing分支每日拉取报告)
+    DAILY_PULL_EMAIL_SUBJECT - 邮件主题 (默认: PrismaX daily pull report)
     PROJECT_ROOT - 项目根目录 (默认: 脚本所在目录的父目录)
 """
 
@@ -201,7 +201,8 @@ def send_email_report(results: List[GitPullResult]):
     smtp_pass = os.environ.get("SMTP_PASS", "")
     email_to = os.environ.get("EMAIL_TO", "wanxin@solidcap.io")
     email_from = os.environ.get("EMAIL_FROM", smtp_user)
-    subject = os.environ.get("EMAIL_SUBJECT", "Prismax testing分支每日拉取报告")
+    # NOTE: 使用专用环境变量，避免与其他 cron 任务共用 EMAIL_SUBJECT 造成标题串台
+    subject = os.environ.get("DAILY_PULL_EMAIL_SUBJECT", "PrismaX daily pull report")
     
     if not smtp_user or not smtp_pass:
         print("⚠️  SMTP_USER/SMTP_PASS 未设置，跳过邮件发送")
@@ -233,7 +234,7 @@ def send_email_report(results: List[GitPullResult]):
     </head>
     <body>
         <div class="container">
-            <h1>📦 Prismax Testing分支每日拉取报告</h1>
+            <h1>📦 PrismaX daily pull report</h1>
             <div class="summary">
                 <p><strong>执行时间:</strong> {now}</p>
                 <p><strong>总计:</strong> {len(results)} 个仓库</p>
