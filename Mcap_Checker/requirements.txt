@@ -1,0 +1,14 @@
+# MCAP Checker dependencies
+# Robot arm data validation tool based on Instruction.md
+
+# Core dependencies
+mcap>=0.8.0
+
+# Optional dependencies (for advanced features)
+numpy>=1.20.0          # Numerical computation, FFT analysis
+opencv-python>=4.5.0   # Image decoding and quality checks (when ENABLE_VISION_CHECKS is enabled)
+
+# Development dependencies (optional)
+pytest>=7.0.0          # Unit tests
+black>=22.0.0          # Code formatting
+mypy>=0.950            # Type checking

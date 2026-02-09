@@ -1,0 +1,5 @@
+# 忽略所有 JSON 报告文件
+*.json
+
+# 但保留此 .gitignore 文件
+!.gitignore
