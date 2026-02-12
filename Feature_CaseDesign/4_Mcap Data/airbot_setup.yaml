@@ -1,0 +1,178 @@
+# @package _global_
+
+defaults:
+- /robots: airbot_play_with_name
+  # - /key_remap: example
+- /key_remap@sampler.instance.key_remap: example
+- basis
+
+remap_module: mcap_data_loader.utils.key
+key_merge:
+  method:
+    _target_: mcap_data_loader.utils.basic.merge_data_stamped
+  pred:
+    _target_: mcap_data_loader.utils.dict.PredReplaceTo
+    targets: [arm]
+    sources:
+    - [eef]
+# ros1_init:
+#   _target_: airdc.common.utils.ros.ros1.init_ros_node_safe
+#   name: airbot_data_collection_node
+
+sampler:
+  name: airbot_mcap_sampler_ros
+  instance:
+    _target_: airdc.common.samplers.mcap_sampler_ros.McapDataSamplerROS
+    video_save_to: folder
+    av_coder:
+      non_monotonic_mode: drop
+      non_monotonic_log: false
+    task_info:
+      operator: op_001
+      station: ptk-001
+      task_name: cable harness
+      task_description: cable harness
+      task_id: '20260203-002-04'
+      skill:
+      - pick
+      - place
+      object:
+      - cable tie
+      - wire tue
+      subtasks:
+      - skill: pick
+        description: cable harness
+
+demonstrator:
+  instance:
+    auto_control:
+      rates: [100]
+      modes: [process]
+    components:
+
+# action_class: airdc.common.systems.grouped.GroupsSendActionConfig
+
+# send_actions:
+#   after_state_change:
+#     active:
+#       _target_: ${action_class}
+#       groups:
+#         - left
+#         - right
+#       action_values:
+#         - [0, 0, 0, 0, 0, 0, 0]
+#         - [0, 0, 0, 0, 0, 0, 0]
+
+      instances:
+      - _target_: airbot_ie.robots.airbot_play.AIRBOTPlay
+        observation: &id001
+        - interfaces:
+          - joint_position
+          - joint_velocity
+          - joint_effort
+          - joint_name
+      # - pose
+# custom joint names to override the default ones
+        joint_names: &id002
+        - [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, 
+            gripper]
+        - [gripper_finger]
+        port: 50050
+      - _target_: airbot_ie.robots.airbot_play.AIRBOTPlay
+        observation: *id001
+        joint_names: *id002
+        port: 50051
+      - _target_: airbot_ie.robots.airbot_play.AIRBOTPlay
+        observation: *id001
+        joint_names: *id002
+        port: 50052
+      - _target_: airbot_ie.robots.airbot_play.AIRBOTPlay
+        observation: *id001
+        joint_names: *id002
+        port: 50053
+      - camera_index: usb-0000:00:14.0-2.1.3.2
+        width: 640
+        height: 480
+        rgb_camera:
+          intrinsics:
+            distortion_model: plumb_bob
+            d: [ -0.021190,   0.236218,   0.014360,   0.003570,  -0.608163]
+            k: [ 686.510889,  0.000000,  342.075741, 0.000000, 689.985589, 260.754306, 0.0, 0.0, 1.0]
+            binning_x: 0
+            binning_y: 0
+          calibration:
+            r: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+            p: [686.510889, 0.000000, 342.075741, 0.000000, 0.000000, 689.985589, 260.754306,  0.000000, 0.0, 0.0, 1.0, 0.0]
+            roi:
+              x_offset: 0
+              y_offset: 0
+              height: 0
+              width: 0
+              do_rectify: false
+        _target_: airdc.common.devices.cameras.v4l2.V4L2Camera
+      - camera_index: usb-0000:00:14.0-3.2
+        width: 640
+        height: 480
+        rgb_camera:
+          intrinsics:
+            distortion_model: plumb_bob
+            d: [-0.083244,   0.655343,   0.003063,   0.007309,  -2.005999]
+            k: [327.465998,  0.000000,   341.511652, 0.000000,   327.770739,   252.506631, 0.0, 0.0, 1.0]
+            binning_x: 0
+            binning_y: 0
+          calibration:
+            r: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+            p: [327.465998,  0.000000, 341.511652, 0.000000, 0.000000, 327.770739, 252.506631, 0.000000, 0.0, 0.0, 1.0, 0.0]
+            roi:
+              x_offset: 0
+              y_offset: 0
+              height: 0
+              width: 0
+              do_rectify: false
+        _target_: airdc.common.devices.cameras.v4l2.V4L2Camera
+      - camera_index: usb-0000:00:14.0-1
+        width: 640
+        height: 480
+        rgb_camera:
+          intrinsics:
+            distortion_model: plumb_bob
+            d: [ 0.037542,  -0.200848,  -0.001590,   0.005339,   0.593650]
+            k: [695.711507, 0.000000, 320.353916, 0.000000,  694.509808, 245.178873, 0.0, 0.0, 1.0]
+            binning_x: 0
+            binning_y: 0
+          calibration:
+            r: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+            p: [695.711507, 0.000000, 320.353916, 0.000000, 0.000000, 694.509808, 245.178873, 0.000000, 0.0, 0.0, 1.0, 0.0]
+            roi:
+              x_offset: 0
+              y_offset: 0
+              height: 0
+              width: 0
+              do_rectify: false
+        _target_: airdc.common.devices.cameras.v4l2.V4L2Camera
+      names:
+      - lead
+      - follow
+      - lead
+      - follow
+      - left_camera
+      - env_camera
+      - right_camera
+      roles:
+      - l
+      - f
+      - l
+      - f
+      - o
+      - o
+      - o
+      groups:
+      - left
+      - left
+      - right
+      - right
+      - /
+      - /
+      - /
+dataset:
+  directory: ros
