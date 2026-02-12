@@ -6,6 +6,11 @@ logs/
 # Daily Pull logs
 daily_pull.log
 
+# Launchd once-per-day state (do not commit)
+.last_run_date
+launchd_stdout.log
+launchd_stderr.log
+
 # Environment config (may contain sensitive info)
 # Uncomment the line below if you don't want to track daily_pull_env.sh
 # daily_pull_env.sh
