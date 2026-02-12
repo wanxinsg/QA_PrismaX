@@ -10,22 +10,21 @@ def _wait_first_event(collector, timeout: float = 15.0):
     try:
         evt = collector.wait_first(timeout=timeout)
     except TimeoutError:
-        # 在超时时间内完全没有收到任何事件（包括 connection_success / queue_update / connect_error）
-        pytest.skip("在超时时间内未收到任何 Socket.IO 事件，跳过队列相关校验")
+        pytest.skip(
+            "No Socket.IO events received within timeout (connection_success / queue_update / connect_error)"
+        )
     if not isinstance(evt, dict):
-        pytest.skip("未收到有效事件，跳过")
+        pytest.skip("No valid event received")
     et = evt.get("_type")
     if et == "connect_error":
-        # 连接被后端拒绝（例如用户/Token 未授权），视为环境问题，跳过业务断言
-        pytest.skip(f"Socket.IO 连接被后端拒绝: {evt.get('payload')}")
+        pytest.skip(f"Socket.IO connection rejected by backend: {evt.get('payload')}")
     if et == "connection_success":
-        # 仅连通但未推送 queue_update，业务断言无法执行
-        pytest.skip("仅收到 connection_success，未收到 queue_update，跳过业务校验")
+        pytest.skip("Received connection_success but no queue_update, cannot run queue assertions")
     if et != "queue_update":
-        pytest.skip(f"首个事件非 queue_update（实际: {et}），跳过业务校验")
+        pytest.skip(f"First event was not queue_update (actual: {et})")
     data = evt.get("payload") or {}
     if not isinstance(data, dict) or "queue" not in data:
-        pytest.skip("queue_update payload 非法或缺少 queue 字段，跳过业务校验")
+        pytest.skip("queue_update payload invalid or missing 'queue' field")
     return data
 
 
@@ -37,9 +36,10 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])
 
-    with allure.step("位置为正整数且按 position 递增（无需从 1 严格连续）且无重复"):
+    with allure.step(
+        "Positions are positive integers, strictly increasing (gaps allowed), no duplicates"
+    ):
         positions = [item.get("position") for item in queue]
-        # 附件：不同机器人分别打印完整 positions 序列
         try:
             robot_id = getattr(env_config, "robot_id", "unknown")
         except Exception:
@@ -51,21 +51,17 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
         )
         if not all(isinstance(p, int) and p > 0 for p in positions):
             allure.attach(str(positions), "positions_invalid", allure.attachment_type.TEXT)
-            pytest.xfail("存在非正整数 position")
-        # 仅要求队列 position 严格递增（允许跳号、无需从 1 开始），且不允许重复
+            pytest.xfail("Non-positive or non-integer position found")
         has_duplicates = len(set(positions)) != len(positions)
         is_monotonic_increasing = all(positions[i] > positions[i - 1] for i in range(1, len(positions)))
         if has_duplicates or not is_monotonic_increasing:
-            # 找到第一个异常位置（<= 前一个元素的位置）
             problem_idx = None
             for i in range(1, len(positions)):
                 if positions[i] <= positions[i - 1]:
                     problem_idx = i
                     break
 
-            # 如果只是重复但整体仍为递增序列（理论上不可能，但做个兜底）
             if problem_idx is None and has_duplicates:
-                # 找到第一个重复元素索引
                 seen = {}
                 for i, p in enumerate(positions):
                     if p in seen:
@@ -82,10 +78,10 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
 
             problem_type_parts = []
             if has_duplicates:
-                problem_type_parts.append("存在重复")
+                problem_type_parts.append("duplicates")
             if not is_monotonic_increasing:
-                problem_type_parts.append("非递增")
-            problem_type = " & ".join(problem_type_parts) if problem_type_parts else "未知问题"
+                problem_type_parts.append("not strictly increasing")
+            problem_type = " & ".join(problem_type_parts) if problem_type_parts else "unknown"
 
             allure.attach(
                 f"type={problem_type}\nindex={problem_idx}\nwindow={window}",
@@ -96,7 +92,7 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
             allure.attach(mismatch_text, "positions_mismatch", allure.attachment_type.TEXT)
             print("[queue_positions] MISMATCH")
             print("[queue_positions] actual   queue:", positions)
-            pytest.xfail("position 非递增或存在重复")
+            pytest.xfail("Positions not strictly increasing or contain duplicates")
 
 
 @pytest.mark.teleop
@@ -107,15 +103,15 @@ def test_queue_membership(socketio_client, env_config: "EnvConfig"):
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])
 
-    with allure.step("每个用户包含 member_class 且类别合法"):
+    with allure.step("Each user has member_class and it is one of the allowed values"):
         allowed = {"Innovator Member", "Amplifier Member"}
         for idx, item in enumerate(queue, start=1):
             if "member_class" not in item:
                 allure.attach(str(item), f"item_{idx}", allure.attachment_type.TEXT)
-                pytest.xfail(f"第 {idx} 个用户缺少 member_class")
+                pytest.xfail(f"User at index {idx} missing member_class")
             if item["member_class"] not in allowed:
                 allure.attach(str(item), f"item_{idx}", allure.attachment_type.TEXT)
-                pytest.xfail(f"第 {idx} 个用户 member_class 不合法: {item['member_class']}")
+                pytest.xfail(f"User at index {idx} has invalid member_class: {item['member_class']}")
 
 
 @pytest.mark.teleop
@@ -127,14 +123,14 @@ def test_queue_status(socketio_client, env_config: "EnvConfig"):
     queue = data.get("queue", [])
 
     if not queue:
-        pytest.skip("当前队列为空，跳过状态校验")
+        pytest.skip("Queue is empty, skipping status validation")
 
-    with allure.step("首个用户为 active，其余为 waiting"):
+    with allure.step("First user is active, rest are waiting"):
         statuses = [item.get("status") for item in queue]
         if statuses[0] != "active":
             allure.attach(str(statuses), "statuses", allure.attachment_type.TEXT)
-            pytest.xfail(f"第一个用户非 active，实际 {statuses[0]}")
+            pytest.xfail(f"First user is not active, actual: {statuses[0]}")
         for idx, s in enumerate(statuses[1:], start=2):
             if s != "waiting":
                 allure.attach(str(statuses), "statuses", allure.attachment_type.TEXT)
-                pytest.xfail(f"第 {idx} 个用户非 waiting，实际 {s}")
+                pytest.xfail(f"User at index {idx} is not waiting, actual: {s}")

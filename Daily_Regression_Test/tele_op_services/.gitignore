@@ -22,3 +22,6 @@ allure-results/
 # Pytest cache
 .pytest_cache/
 
+# Cron SMTP 配置（含密码，勿提交）
+.tele_op_cron_env
+

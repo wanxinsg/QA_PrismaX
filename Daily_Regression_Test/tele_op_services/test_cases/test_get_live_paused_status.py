@@ -24,7 +24,7 @@ def _fetch_robots(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_live_paused_status(api_client):
-    """检查 robots 列表包含 arm1/arm2/arm3/arm4 四个机器人，且 live_paused 均为 False。"""
+    """Assert robots list contains arm1/arm2/arm3/arm4 and each live_paused is False."""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}

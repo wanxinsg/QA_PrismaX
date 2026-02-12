@@ -24,7 +24,7 @@ def _fetch_robots(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_status_code(api_client, config):
-    """仅校验接口返回 200 且包含配置中的机器人 ID。"""
+    """Assert response is 200 and contains the configured robot ID."""
 
     robots = _fetch_robots(api_client)
 
@@ -43,7 +43,7 @@ def test_get_robots_status_code(api_client, config):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_id_list(api_client):
-    """校验返回的 robot_id 集合必须正好是 {arm1, arm2, arm3, arm4}。"""
+    """Assert robot_id set is exactly {arm1, arm2, arm3, arm4}."""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
@@ -61,7 +61,7 @@ def test_get_robots_id_list(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_queue_length(api_client):
-    """校验 arm1/arm2/arm3/arm4 的 queue_length 均不为 0。"""
+    """Assert queue_length is non-zero for arm1/arm2/arm3/arm4."""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}
@@ -81,7 +81,7 @@ def test_get_robots_queue_length(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_get_robots_streamid(api_client):
-    """校验 arm1/arm2/arm3/arm4 的 youtube_stream_id 为非空字符串。"""
+    """Assert youtube_stream_id is non-empty for arm1/arm2/arm3/arm4."""
 
     robots = _fetch_robots(api_client)
     robots_map = {r.get("robot_id"): r for r in robots}

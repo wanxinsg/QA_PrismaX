@@ -5,9 +5,7 @@ import allure
 def _fetch_leaderboard(api_client):
     """Call GET /tele_op/leaderboard and return the user list.
 
-    兼容两种返回结构：
-    - 直接返回 list
-    - 返回 {"users": [...]} 结构
+    Supports two response shapes: raw list or {"users": [...]} / {"leaderboard": [...]}.
     """
 
     with allure.step("Send GET /tele_op/leaderboard"):
@@ -17,7 +15,6 @@ def _fetch_leaderboard(api_client):
         assert response.status_code == 200
 
     data = response.json()
-    # 当前后端返回结构为: {"leaderboard": [...]}
     if isinstance(data, dict) and "leaderboard" in data:
         users = data["leaderboard"]
     elif isinstance(data, list):
@@ -38,14 +35,7 @@ def _fetch_leaderboard(api_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_leaderboard(api_client):
-    """验证排行榜列表字段完整、排名连续且按积分从高到低排序。
-
-    要求：
-    - 列表中每个 user 至少包含: user_id, total_points, rank, controlled_hours
-    - 排行榜至少包含前 50 名用户
-    - rank 从 1 到 50 连续无缺失
-    - 列表按 total_point 从高到低排序（允许并列分）
-    """
+    """Validate leaderboard: required fields, top 50, ranks 1-50 continuous, sorted by total_points descending."""
 
     users = _fetch_leaderboard(api_client)
 
@@ -71,7 +61,6 @@ def test_leaderboard(api_client):
 
     with allure.step("Validate leaderboard is sorted by total_points descending"):
         points = [u.get("total_points") for u in users]
-        # 允许相等分数，但不允许后面的分数高于前面
         sorted_points = sorted(points, reverse=True)
         assert points == sorted_points, (
             "Leaderboard is not sorted by total_points descending"

@@ -35,7 +35,7 @@ TELE_BASE="${TELE_BASE:-}"
 ROBOT_ID="${ROBOT_ID:-arm1}"
 # 默认使用经过验证的 Tele-Op 队列用户，用于日常回归
 USER_ID="${USER_ID:-1073381}"
-TOKEN="${TOKEN:-5O01l-iffPoW1iACtLaYCI5w6u1KTvOquQaIfE5jZdU}"
+TOKEN="${TOKEN:-LrwLmEoJ1YHkrdhZFseU_yfOjX9ue3woI_vDBHvaL8M}"
 
 PYTEST_EXIT_CODE=0
 
@@ -108,14 +108,36 @@ start_backend_if_needed() {
   original_dir="$(pwd)"
 
   # 如果有进程占用该端口，先尝试杀掉（需要 lsof）
-  if command -v lsof >/dev/null 2>&1; then
+  kill_port_if_in_use() {
+    local port="$1"
     local pids
-    pids="$(lsof -ti :\"$TELE_PORT\" 2>/dev/null || true)"
+    pids="$(lsof -ti :"${port}" 2>/dev/null || true)"
     if [ -n "$pids" ]; then
-      print_warn "Killing existing process(es) on port ${TELE_PORT}: $pids"
+      print_warn "Killing existing process(es) on port ${port}: $pids"
       echo "$pids" | xargs kill -9 2>/dev/null || true
-      # 等待进程真正退出
-      sleep 2
+      return 0
+    fi
+    return 1
+  }
+  if command -v lsof >/dev/null 2>&1; then
+    if kill_port_if_in_use "$TELE_PORT"; then
+      # 等待进程真正退出、端口释放
+      sleep 3
+      # 若仍占用则再杀一次并多等一会
+      if kill_port_if_in_use "$TELE_PORT"; then
+        sleep 3
+      fi
+    fi
+  else
+    print_warn "lsof not found; cannot free port ${TELE_PORT}. If backend fails with 'Address already in use', install lsof or manually kill the process on port ${TELE_PORT}."
+  fi
+
+  # 启动前再次确认端口未被占用，避免后端报 OSError: [Errno 48] Address already in use
+  if command -v lsof >/dev/null 2>&1; then
+    if lsof -ti :"${TELE_PORT}" >/dev/null 2>&1; then
+      print_err "Port ${TELE_PORT} is still in use. Please run: lsof -i :${TELE_PORT}  # then kill the process, or use another port (TELE_PORT=8082 ./run_tests.sh)"
+      cd "$original_dir"
+      return 1
     fi
   fi
 
@@ -224,7 +246,7 @@ generate_allure_report() {
   # 如果端口已被占用，尝试释放
   if command -v lsof >/dev/null 2>&1; then
     local pids
-    pids="$(lsof -ti :\"$port\" 2>/dev/null || true)"
+    pids="$(lsof -ti :"${port}" 2>/dev/null || true)"
     if [ -n "$pids" ]; then
       print_warn "Killing existing process(es) on port ${port}: $pids"
       echo "$pids" | xargs kill -9 2>/dev/null || true
