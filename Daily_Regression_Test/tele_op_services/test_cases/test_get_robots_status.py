@@ -23,18 +23,26 @@ def _fetch_robots(api_client):
 @allure.title("test_get_robots_status_code")
 @pytest.mark.regression
 @pytest.mark.api
-def test_get_robots_status_code(api_client, config):
-    """Assert response is 200 and contains the configured robot ID."""
+def test_get_robots_status_code(api_client):
+    """Assert response is 200 and each of arm1/arm2/arm3/arm4 exists with required fields."""
 
     robots = _fetch_robots(api_client)
+    robots_map = {r.get("robot_id"): r for r in robots}
+    expected_ids = {"arm1", "arm2", "arm3", "arm4"}
 
-    with allure.step("Validate configured robot exists and has basic fields"):
-        robot = next((r for r in robots if r.get("robot_id") == config.robot_id), None)
-        assert robot is not None, f"Robot {config.robot_id} not found in response"
-        assert isinstance(robot.get("is_available"), bool)
-        assert isinstance(robot.get("queue_length"), int)
-        assert "youtube_stream_id" in robot
-        assert isinstance(robot.get("live_paused"), bool)
+    with allure.step("Validate robots set equals {arm1, arm2, arm3, arm4}"):
+        assert set(robots_map.keys()) == expected_ids, (
+            f"Expected robots {expected_ids}, got {set(robots_map.keys())}"
+        )
+
+    with allure.step("Validate each robot has required fields (is_available, queue_length, youtube_stream_id, live_paused)"):
+        for rid in expected_ids:
+            robot = robots_map.get(rid)
+            assert robot is not None, f"Robot {rid} not found in response"
+            assert isinstance(robot.get("is_available"), bool), f"{rid}.is_available must be bool"
+            assert isinstance(robot.get("queue_length"), int), f"{rid}.queue_length must be int"
+            assert "youtube_stream_id" in robot, f"{rid} missing youtube_stream_id"
+            assert isinstance(robot.get("live_paused"), bool), f"{rid}.live_paused must be bool"
 
 
 @allure.feature("Tele-Op")

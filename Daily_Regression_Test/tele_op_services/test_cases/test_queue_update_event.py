@@ -1,9 +1,5 @@
 import allure
 import pytest
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from config import TeleOpConfig as EnvConfig  # type alias for hints only
 
 
 def _wait_first_event(collector, timeout: float = 15.0):
@@ -31,7 +27,8 @@ def _wait_first_event(collector, timeout: float = 15.0):
 @pytest.mark.teleop
 @allure.feature("Tele-Op Queue")
 @allure.story("Queue Positions")
-def test_queue_positions(socketio_client, env_config: "EnvConfig"):
+def test_queue_positions(socketio_client, robot_id: str):
+    """Run for each of arm1, arm2, arm3, arm4 via robot_id parametrization."""
     sio, collector = socketio_client
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])
@@ -40,10 +37,6 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
         "Positions are positive integers, strictly increasing (gaps allowed), no duplicates"
     ):
         positions = [item.get("position") for item in queue]
-        try:
-            robot_id = getattr(env_config, "robot_id", "unknown")
-        except Exception:
-            robot_id = "unknown"
         allure.attach(
             "\n".join(map(str, positions)),
             f"positions_{robot_id}",
@@ -98,7 +91,8 @@ def test_queue_positions(socketio_client, env_config: "EnvConfig"):
 @pytest.mark.teleop
 @allure.feature("Tele-Op Queue")
 @allure.story("Queue Membership Class")
-def test_queue_membership(socketio_client, env_config: "EnvConfig"):
+def test_queue_membership(socketio_client, robot_id: str):
+    """Run for each of arm1, arm2, arm3, arm4 via robot_id parametrization."""
     sio, collector = socketio_client
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])
@@ -117,7 +111,8 @@ def test_queue_membership(socketio_client, env_config: "EnvConfig"):
 @pytest.mark.teleop
 @allure.feature("Tele-Op Queue")
 @allure.story("Queue Status")
-def test_queue_status(socketio_client, env_config: "EnvConfig"):
+def test_queue_status(socketio_client, robot_id: str):
+    """Run for each of arm1, arm2, arm3, arm4 via robot_id parametrization."""
     sio, collector = socketio_client
     data = _wait_first_event(collector, timeout=15.0)
     queue = data.get("queue", [])

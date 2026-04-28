@@ -20,7 +20,7 @@ else
   SCRIPT_PATH="$0"
 fi
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
-BACKEND_DIR="/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
+BACKEND_DIR="/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
 TEST_DIR="$SCRIPT_DIR"
 ALLURE_RESULTS_DIR="$TEST_DIR/test_report/allure-results"
 ALLURE_REPORT_DIR="$TEST_DIR/test_report/allure-report"
@@ -156,7 +156,7 @@ start_backend_if_needed() {
   cd "$BACKEND_DIR"
   export TEST_MODE=true
   export GOOGLE_CLOUD_PROJECT=thepinai
-  export GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json
+  export GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json
   export PORT="$TELE_PORT"
   
   nohup "$BACKEND_DIR/.venv/bin/python" app.py \
@@ -535,7 +535,19 @@ PY
 
 main() {
   print_info "== Tele-Op Backend Regression Test Runner =="
-  
+
+  # 每天只跑一次：若今日已执行过则直接退出（避免 LaunchAgent 多次触发导致重复跑）
+  LAST_RUN_STAMP="$SCRIPT_DIR/.last_regression_date"
+  TODAY=$(date '+%Y-%m-%d')
+  if [[ -f "$LAST_RUN_STAMP" ]]; then
+    LAST=$(cat "$LAST_RUN_STAMP" 2>/dev/null || true)
+    if [[ -n "$LAST" && "$LAST" = "$TODAY" ]]; then
+      print_info "Already ran today ($TODAY). Skipping to avoid duplicate run."
+      exit 0
+    fi
+  fi
+  echo "$TODAY" > "$LAST_RUN_STAMP"
+
   # 启动后端服务，如果失败则退出
   if ! start_backend_if_needed; then
     print_err "Failed to start backend service. Aborting tests."
@@ -547,6 +559,8 @@ main() {
   generate_allure_report
   # 发送基于 allure-results 的测试摘要邮件（包含 xfail 高亮）
   send_email_summary || true
+  # 写入今日运行标记，供 LaunchAgent 补跑脚本判断当天是否已执行
+  date '+%Y-%m-%d' > "$SCRIPT_DIR/.last_regression_date"
   exit "$PYTEST_EXIT_CODE"
 }
 

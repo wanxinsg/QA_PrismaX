@@ -34,12 +34,22 @@ def api_client(config, logger):
 
 # ---- Socket.IO test fixtures (for queue_update_event tests) ------------------
 
+# All four arms so that queue tests run for each robot
+TELEOP_ARM_IDS = ["arm1", "arm2", "arm3", "arm4"]
+
 
 @pytest.fixture(scope="session")
 def env_config(config):
     """Alias Tele-Op HTTP config as env_config for socket tests."""
 
     return config
+
+
+@pytest.fixture(params=TELEOP_ARM_IDS, ids=TELEOP_ARM_IDS)
+def robot_id(request):
+    """Parametrized robot_id so queue tests run for arm1, arm2, arm3, arm4."""
+
+    return request.param
 
 
 class QueueEventCollector:
@@ -59,9 +69,10 @@ class QueueEventCollector:
 
 
 @pytest.fixture(scope="function")
-def socketio_client(env_config, logger):
+def socketio_client(env_config, robot_id, logger):
     """
     Connect to Socket.IO of tele-op backend and yield (client, collector).
+    Runs for each of arm1, arm2, arm3, arm4 via robot_id parametrization.
     Requires USER_ID and TOKEN to be valid for the backend DB.
     """
 
@@ -117,7 +128,7 @@ def socketio_client(env_config, logger):
         sio.connect(
             server_url,
             auth={
-                "robotId": env_config.robot_id,
+                "robotId": robot_id,
                 "token": env_config.token,
                 "userId": env_config.user_id,
             },

@@ -1,4 +1,4 @@
-分析/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend下面的代码，生成一份完整的Backend测试设计文档，
+分析/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend下面的代码，生成一份完整的Backend测试设计文档，
 内容包括但不限于：项目概述，测试框架设计，测试用例，测试报告等。
 
 测试框架要求
@@ -35,9 +35,9 @@ tele_op_services
 1) 启动 Tele-Op 本地服务（示例）：
 
 ```bash
-cd /Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services \
+cd /Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services \
   && source .venv/bin/activate \
-  && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json \
+  && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json \
   PORT=8081 python app.py
 ```
 2) 检查tele_op_services下的venv, 启动测试虚拟环境，如有测试依赖，则安装测试依赖

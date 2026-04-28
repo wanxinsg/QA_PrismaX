@@ -14,13 +14,13 @@ import sys
 import os
 
 # 添加后端目录到路径，以便导入 get_db_connection
-backend_dir = "/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
+backend_dir = "/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
 sys.path.insert(0, backend_dir)
 
 # 需要先设置环境变量，因为 app.py 在导入时会读取
 os.environ['TEST_MODE'] = 'true'
 os.environ['GOOGLE_CLOUD_PROJECT'] = 'thepinai'
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json'
 
 import sqlalchemy
 from app import get_db_connection
