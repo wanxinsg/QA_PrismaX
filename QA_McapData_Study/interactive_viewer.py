@@ -180,7 +180,7 @@ def view_joint_data(mcap_path, topic, num_messages=5):
 def interactive_menu():
     """交互式菜单"""
     # 查找 MCAP 文件
-    data_dir = Path("../Feature_CaseDesign/4_Mcap Data/output-20260129")
+    data_dir = Path("../QA_Feature_CaseDesign/3_Mcap Data/output-20260129")
     
     if not data_dir.exists():
         print("❌ 数据目录不存在")

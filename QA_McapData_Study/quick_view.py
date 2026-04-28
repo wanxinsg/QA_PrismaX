@@ -138,12 +138,12 @@ def main():
     if len(sys.argv) < 2:
         print("使用方法: python quick_view.py <mcap文件路径>")
         print("\n示例:")
-        print("  python quick_view.py ../Feature_CaseDesign/4_Mcap\\ Data/output-20260129/0.mcap")
+        print("  python quick_view.py ../QA_Feature_CaseDesign/4_Mcap\\ Data/output-20260129/0.mcap")
         print("  python quick_view.py path/to/file.mcap")
         
         # 尝试查找数据文件
         possible_paths = [
-            Path("../Feature_CaseDesign/4_Mcap Data/output-20260129"),
+            Path("../QA_Feature_CaseDesign/3_Mcap Data/output-20260129"),
             Path("output-20260129"),
             Path(".")
         ]

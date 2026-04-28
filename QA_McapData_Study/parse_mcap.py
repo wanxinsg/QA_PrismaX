@@ -255,7 +255,7 @@ def main():
     主函数 - 演示如何使用
     """
     # 设置数据路径 - 更新为相对于当前脚本的路径
-    base_dir = Path(__file__).parent.parent / "Feature_CaseDesign/4_Mcap Data/output-20260129"
+    base_dir = Path(__file__).parent.parent / "QA_Feature_CaseDesign/3_Mcap Data/output-20260129"
     
     # 如果路径不存在，尝试其他可能的路径
     if not base_dir.exists():
@@ -264,7 +264,7 @@ def main():
         if not base_dir.exists():
             print("❌ 错误: 找不到数据目录 'output-20260129'")
             print(f"请确保数据目录在以下位置之一:")
-            print(f"  1. {Path(__file__).parent.parent / 'Feature_CaseDesign/4_Mcap Data/output-20260129'}")
+            print(f"  1. {Path(__file__).parent.parent / 'QA_Feature_CaseDesign/3_Mcap Data/output-20260129'}")
             print(f"  2. {Path(__file__).parent / 'output-20260129'}")
             print(f"\n或者直接指定 MCAP 文件路径运行单个文件分析:")
             print(f"  analyze_mcap_structure('路径/到/文件.mcap')")

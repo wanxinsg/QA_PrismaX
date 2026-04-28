@@ -264,16 +264,16 @@ def main():
         epilog="""
 示例:
   # 列出所有通道
-  python view_joint_data.py ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --list
+  python view_joint_data.py ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --list
   
   # 查看左臂主控制器数据（前10条）
-  python view_joint_data.py ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states
+  python view_joint_data.py ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states
   
   # 查看前50条消息
-  python view_joint_data.py ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states --max 50
+  python view_joint_data.py ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states --max 50
   
   # 显示原始数据
-  python view_joint_data.py ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states --raw
+  python view_joint_data.py ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topic /robot/arm_left_lead/joint_states --raw
         """
     )
     
@@ -287,7 +287,7 @@ def main():
     
     if not Path(args.mcap_file).exists():
         # 尝试补全路径
-        possible_path = Path("../Feature_CaseDesign/4_Mcap Data/output-20260129") / args.mcap_file
+        possible_path = Path("../QA_Feature_CaseDesign/3_Mcap Data/output-20260129") / args.mcap_file
         if possible_path.exists():
             args.mcap_file = str(possible_path)
         else:

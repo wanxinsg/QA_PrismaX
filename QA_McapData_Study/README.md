@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 ```bash
 # 查看 0.mcap 文件信息
-python quick_view.py ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
+python quick_view.py ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
 
 # 或者如果没有参数，会自动查找并分析第一个找到的 MCAP 文件
 python quick_view.py
@@ -133,19 +133,19 @@ pip install mcap-cli
 
 ```bash
 # 查看文件信息
-mcap info ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
+mcap info ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
 
 # 列出所有通道
-mcap list ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
+mcap list ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
 
 # 查看消息详情
-mcap cat ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
+mcap cat ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap
 
 # 查看特定通道
-mcap cat ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topics /robot/env_camera/color/image_raw
+mcap cat ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --topics /robot/env_camera/color/image_raw
 
 # 导出为 JSON
-mcap cat ../Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --format json > output.json
+mcap cat ../QA_Feature_CaseDesign/4_Mcap\ Data/output-20260129/0.mcap --format json > output.json
 ```
 
 ## 📝 Python API 使用示例
