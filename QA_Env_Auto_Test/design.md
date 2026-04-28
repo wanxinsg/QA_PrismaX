@@ -26,7 +26,7 @@ Test_Env/
 
 环境准备：
 启动本地环境
-cd /Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services && source .venv/bin/activate && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json PORT=8081 python app.py
+cd /Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services && source .venv/bin/activate && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json PORT=8081 python app.py
 
 queue_check.py已经写了个脚本去获取queue_update，需要用pytest写测试脚本，验证
 1.queue Update正常返回了数据

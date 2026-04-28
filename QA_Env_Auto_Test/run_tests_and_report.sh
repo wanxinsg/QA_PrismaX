@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # Configuration
-TEST_ENV_DIR="/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Test_Env"
-BACKEND_DIR="/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
+TEST_ENV_DIR="/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Test_Env"
+BACKEND_DIR="/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services"
 ALLURE_RESULTS_DIR="$TEST_ENV_DIR/test_report/allure-results"
 BACKEND_LOG="$TEST_ENV_DIR/backend.log"
-TEST_SRC_DIR="/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/QA_Test"
+TEST_SRC_DIR="/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/QA_Test"
 
 # Defaults (can be overridden by env)
 # Hardcoded test target (requested)
@@ -15,7 +15,7 @@ TELE_PORT="8081"
 ROBOT_ID="arm1"
 ROBOT_IDS="${ROBOT_IDS:-arm1,arm2,arm3}"
 GOOGLE_CLOUD_PROJECT="${GOOGLE_CLOUD_PROJECT:-thepinai}"
-GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:-/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json}"
+GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:-/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json}"
 
 # Required credentials for tests
 USER_ID="1073381"

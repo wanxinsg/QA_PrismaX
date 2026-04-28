@@ -30,9 +30,9 @@ Test_Env/
 1) 启动 Tele-Op 本地服务（示例）：
 
 ```bash
-cd /Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services \
+cd /Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_tele_op_services \
   && source .venv/bin/activate \
-  && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/Prismax/thepinai-compute-key.json \
+  && TEST_MODE=true GOOGLE_CLOUD_PROJECT=thepinai GOOGLE_APPLICATION_CREDENTIALS=/Users/wanxin/PycharmProjects/WORK/Prismax/thepinai-compute-key.json \
   PORT=8081 python app.py
 ```
 
