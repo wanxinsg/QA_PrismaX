@@ -31,7 +31,7 @@ curl -X POST 'http://localhost:8080/auth/twitter/initiate' \
   - 触发与UI路径：账户页 → Personal info → Twitter → “Link Twitter” 按钮
   - 代码片段（Account.js，handleTwitterLink 完整上下文）
 
-```454:552:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Account/Account.js
+```454:552:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Account/Account.js
     const handleTwitterLink = useCallback(async () => {
         const token = localStorage.getItem('gatewayToken');
         if (!token) {
@@ -173,7 +173,7 @@ curl -G 'http://localhost:8080/api/get-users' \
     - 进入账户页自动请求；管理后台用户表页面加载自动请求
   - 代码片段（Account.js，fetchUserInfo 完整上下文）
 
-```113:166:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Account/Account.js
+```113:166:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Account/Account.js
     const fetchUserInfo = useCallback(async () => {
         // Use this variable to handle the fallback case in the finally block
         let fetchSuccess = false;
@@ -226,7 +226,7 @@ curl -G 'http://localhost:8080/api/get-users' \
             });
 ```
 
-```196:241:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/context/SwapMainAppContext.js
+```196:241:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/context/SwapMainAppContext.js
     const fetchUserInfoAfterConnect = async () => {
         try {
             // Wait for reCAPTCHA to be ready before making the request
@@ -273,7 +273,7 @@ curl -G 'http://localhost:8080/api/get-users' \
             });
 ```
 
-```15:38:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Admin/UserTable.js
+```15:38:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Admin/UserTable.js
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -325,7 +325,7 @@ curl -X POST 'http://localhost:8080/api/disconnect-wallet-from-email' \
   - 触发与UI路径：账户页 → 钱包区域 → “Unlink Wallet” 图标点击
   - 代码片段（Account.js，handleDisconnectWallet 完整上下文）
 
-```585:631:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Account/Account.js
+```585:631:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Account/Account.js
     const handleDisconnectWallet = async () => {
         try {
             const token = localStorage.getItem('gatewayToken');
@@ -401,7 +401,7 @@ curl -X POST 'http://localhost:8080/api/update-user-info' \
   - 触发与UI路径：账户页 → Personal info → “Edit” → 修改 → “Save”
   - 代码片段（Account.js，saveUserInfo 完整上下文）
 
-```314:367:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Account/Account.js
+```314:367:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Account/Account.js
     const saveUserInfo = useCallback(async (overrideValues = {}) => {
         const storedEmail = localStorage.getItem('userEmail') || '';
         const storedWalletAddress = localStorage.getItem('walletAddress') || '';
@@ -482,7 +482,7 @@ curl -X POST 'http://localhost:8080/api/daily-login-points' \
   - 触发与UI路径：应用上下文初始化或登录/连接钱包后自动触发（无按钮）
   - 代码片段（SwapMainAppContext.js，handleDailyLoginPoints 完整上下文）
 
-```273:301:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/context/SwapMainAppContext.js
+```273:301:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/context/SwapMainAppContext.js
     const handleDailyLoginPoints = async () => {
         try {
             const requestBody = {};
@@ -550,7 +550,7 @@ curl -G 'http://localhost:8080/api/get-point-transactions' \
   - 触发与UI路径：打开 Dashboard 页面时自动拉取；分页/刷新时再次拉取
   - 代码片段（Dashboard.js，fetchPointsData 完整上下文）
 
-```104:164:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/Dashboard/Dashboard.js
+```104:164:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/Dashboard/Dashboard.js
     const fetchPointsData = async () => {
         try {
             const params = new URLSearchParams();
@@ -642,7 +642,7 @@ curl -X POST 'http://localhost:8080/api/record-crypto-payment' \
   - 触发与UI路径：在头部连接钱包并完成链上支付交易后自动上报（无按钮直接对应）
   - 代码片段（ConnectWalletHeader.js，transferSplToken 内部上报）
 
-```1510:1629:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/src/components/header/ConnectWalletHeader.js
+```1510:1629:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/src/components/header/ConnectWalletHeader.js
     const transferSplToken = async (fromPublicKeyStr, provider, tokenType, C2C_RECEIVING_TOKEN_ACCOUNT) => {
         try {
             const connection = new Connection(RPC_URL, "confirmed");

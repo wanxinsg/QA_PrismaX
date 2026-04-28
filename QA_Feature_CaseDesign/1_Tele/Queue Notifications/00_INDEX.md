@@ -131,7 +131,7 @@
 - **Jira Ticket**: [PRIS-84](https://prismax.atlassian.net/browse/PRIS-84)
 - **PR #11**: [添加浏览器队列通知](https://github.com/PrismaXAI/app-prismax-rp/pull/11)
 - **PR #12**: [优化移动端体验](https://github.com/PrismaXAI/app-prismax-rp/pull/12)
-- **源代码**: `/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp/`
+- **源代码**: `/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp/`
 
 ### Git 提交记录
 ```

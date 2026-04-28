@@ -23,7 +23,7 @@
 
 #### 2.1 QA 角色定义（`qa_helper.py`）
 
-```12:44:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```12:44:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 QA_ROLE_BASE = "qa"
 QA_ROLE_SENIOR = "senior qa"
 QA_ROLE_EXPERT = "expert qa"
@@ -38,7 +38,7 @@ QA_ALLOWED_ROLES = {QA_ROLE_BASE, QA_ROLE_SENIOR, QA_ROLE_EXPERT}
 
 #### 2.2 每轮所需 Reviewer 数
 
-```12:16:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```12:16:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 QA_REVIEWER_COUNT_BY_ROUND = {
     1: 3,
     2: 2,
@@ -54,7 +54,7 @@ QA_REVIEWER_COUNT_BY_ROUND = {
 
 #### 2.3 轮次结果对应的 upload 状态
 
-```18:27:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```18:27:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 QA_ROUND_SUCCESS_STATUS = {
     1: "REVIEW_FIRST_ROUND_SUCCEEDED",
     2: "REVIEW_SECOND_ROUND_SUCCEEDED",
@@ -77,7 +77,7 @@ QA_ROUND_FAILED_STATUS = {
 
 #### 3.1 队列规则表述
 
-```51:67:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```51:67:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 def _get_qa_queue_rules(user_role: str):
     if user_role == QA_ROLE_BASE:
         return [
@@ -109,7 +109,7 @@ def _get_qa_queue_rules(user_role: str):
 
 #### 3.2 QA 队列接口：`GET /data/qa/uploads`
 
-```492:548:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
+```492:548:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
 @app.route('/data/qa/uploads', methods=['GET'])
 def get_qa_uploads():
     user, user_role, error_response = _require_qa_user()
@@ -174,7 +174,7 @@ def get_qa_uploads():
 
 #### 4.1 接口：`GET /data/qa/uploads/<upload_id>/episodes`
 
-```551:704:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
+```551:704:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
 @app.route('/data/qa/uploads/<int:upload_id>/episodes', methods=['GET'])
 def get_qa_upload_episodes(upload_id):
     _, user_role, error_response = _require_qa_user()
@@ -215,7 +215,7 @@ def get_qa_upload_episodes(upload_id):
 
 #### 4.2 采样算法 `_pick_deterministic_sample`
 
-```162:177:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```162:177:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 def _get_sample_size(total_count: int) -> int:
     if total_count <= 0:
         return 0
@@ -254,7 +254,7 @@ def _pick_deterministic_sample(episode_ids, upload_id: int, qa_round: int):
 
 #### 5.1 接口：`POST /data/qa/uploads/<upload_id>/review`
 
-```707:904:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
+```707:904:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
 @app.route('/data/qa/uploads/<int:upload_id>/review', methods=['POST'])
 def submit_upload_qa_review(upload_id):
     user, user_role, error_response = _require_qa_user()
@@ -295,7 +295,7 @@ def submit_upload_qa_review(upload_id):
 
 #### 5.3 样本一致性校验
 
-```746:828:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
+```746:828:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
 provided_sample_ids = sorted(set(_extract_sampled_episode_ids_from_review_result(review_result)))
 ...
 existing_sample_rows = conn.execute("""
@@ -326,7 +326,7 @@ if provided_sample_ids != reference_sample_ids:
 
 `_validate_review_result_payload` 会对 `review_result` 做强约束检查：
 
-```194:239:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```194:239:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 def _validate_review_result_payload(review_result):
     if not isinstance(review_result, dict):
         return False, "review_result must be an object"
@@ -381,7 +381,7 @@ def _validate_review_result_payload(review_result):
 
 #### 6.1 分歧检测 `_detect_round_disagreement`
 
-```125:159:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```125:159:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 def _detect_round_disagreement(round_rows):
     ...
     scores = [int(row._mapping.get("qa_score")) ...]
@@ -412,7 +412,7 @@ def _detect_round_disagreement(round_rows):
 
 #### 6.2 汇总决策 `_build_final_decision`
 
-```253:279:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
+```253:279:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/qa_helper.py
 def _build_final_decision(round_rows):
     scores = [int(row._mapping.get("qa_score") or 0) for row in round_rows]
     gate_snapshots = [...]
@@ -448,7 +448,7 @@ def _build_final_decision(round_rows):
 
 在 `submit_upload_qa_review` 的 DB 事务中：
 
-```861:887:/Users/wanxin/PycharmProjects/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
+```861:887:/Users/wanxin/PycharmProjects/WORK/Prismax/app-prismax-rp-backend/app_prismax_data_pipeline/app.py
 round_required = QA_REVIEWER_COUNT_BY_ROUND.get(qa_round, 1)
 disagreement = _detect_round_disagreement(round_rows)
 ...
