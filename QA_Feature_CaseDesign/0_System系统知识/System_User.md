@@ -16,25 +16,25 @@
     - `Amplifier Member`：99 美金付费升级。
     - `Innovator Member`：399 美金进一步升级。
   - 部分**高级功能**仅对特定会员等级开放，典型包括：
-    - **TeleOp 机器人远程控制**：
-      - Explorer：完全禁止使用所有 TeleOp 机器人（加入任意 `arm1/arm2/arm3` 队列都会返回 403）。
+    - **TeleOp 机器人远程控制**（PRIS-130 起按后端 `robot_status.robot_class` 区分，名称与 slug 由后端 `robot_name` / `robot_slug` 提供）：
+      - Explorer：完全禁止使用所有 TeleOp 机器人（加入任意机器人队列都会返回 403）。
       - Amplifier：
-        - Training Arm（`arm1`）：每个 UTC 自然日最多成功入队 **3 次**（基于 `robot_queue.created_at` 统计），第 4 次及之后会返回 403。
-        - Buddy Arm（`arm3`）：终身总共最多 **3 次** TeleOp 使用（依据 `tele_op_control_history.robot_id='arm3'` 统计）。
-        - Monad Arm（`arm2`）：当前版本在会员维度**无额外次数上限**，仅受通用队列 / Fast Track 规则约束。
+        - **`robot_class == 'training'`**（原 Training Arm，如 arm1/arm4）：每个 UTC 自然日最多成功入队 **3 次**（基于 `robot_queue.created_at` 统计），第 4 次及之后会返回 403，错误文案含该机器人的 `robot_name`。
+        - **`robot_class == 'open'`**（原 Buddy Arm，如 arm3）：终身总共最多 **3 次**该机器人的 TeleOp 使用（依据 `tele_op_control_history` 统计），再次入队返回 403，错误文案以 "Amplifier members have reached the 3 total uses limit for" 开头并含 `robot_name`，前端据此弹升级弹窗。
+        - **`robot_class == 'access'`**（原 Partner/Monad Arm，如 arm2）：需邀请码与 Monad 钱包/购买校验；当前版本在会员维度**无额外次数上限**，仅受通用队列 / Fast Track 规则约束。
         - Amplifier 无机器人预约权限。
       - Innovator：可使用所有 TeleOp 功能（含 Fast Track 抢占队列和全部三种机械臂），并享有更高积分倍率。
     - **机器人预约 `/api/reserve-robot`**：
       - 仅对 Innovator Member 开放，用于预约线下演示或远程 TeleOp 体验（需 `user_id + token` 校验）。
     - **Fast Track（TeleOp 队列抢占）**：
-      - 仅 Innovator 可使用，且所有机器人合计每天最多 6 次 Fast Track 机会（跨 `arm1/arm2/arm3` 共享）。
+      - 仅 Innovator 可使用，且所有机器人合计每天最多 6 次 Fast Track 机会（跨所有机器人共享）；达上限时提示 "maximum 6 fast tracks a day"。
 
 - **多链钱包 + 邮箱双渠道账户体系**
   - 用户既可以从 **邮箱** 进入，也可以从 **钱包地址** 进入。
   - 通过 `linked_email`、`linked_wallet_address` 将“邮箱账户”和“钱包账户”建立绑定关系，统一视为同一用户身份。
 
 - **积分与权益体系深度绑定**
-  - 积分累积方式：首次登录奖励、每日登录、测验问卷、评论奖励、推荐关系分成等，均通过 `point_transactions` + `users.total_points` 管理。
+  - 积分累积方式：首次登录奖励、每日登录、测验问卷、~~评论奖励~~（已因 PRIS-125 暂时关闭）、推荐关系分成等，均通过 `point_transactions` + `users.total_points` 管理。
   - 会员等级与积分奖励倍率挂钩（例如 Innovator 日常积分更高）。
 
 - **支付与会员升级闭环**
@@ -111,7 +111,7 @@
 - `transaction_type`：交易类型：
   - `daily_login`：每日登录奖励。
   - `quiz`：答题奖励。
-  - `comment_reward`：评论奖励。
+  - `comment_reward`：~~评论奖励~~（已因 PRIS-125 暂时关闭）。
   - 其他类型可能扩展。
 - `user_local_date`：用户本地日期（每日登录判重使用）。
 - `created_at_utc`：UTC 记录时间。
@@ -407,17 +407,17 @@
     - 全部答对再额外奖励 1000 分。
   - 写入 `point_transactions` 和 `users.total_points`。
 
-### 5. 评论奖励 `/api/check-comment-reward`
+### 5. ~~评论奖励 `POST /api/check-comment-reward`~~（已因 PRIS-125 暂时关闭）
 
-- 限流：每个 `user_id` 每分钟最多 5 次调用。
-- 校验评论是否“有意义”：
-  - 至少 10 个字符，且至少 3 个单词。
-- 每日每个用户仅可获得一次评论奖励：
-  - 通过检查当天是否存在 `transaction_type = 'comment_reward'` 的记录。
-- 奖励积分：
-  - 若用户为 `Explorer Member`：50 分。
-  - 其他会员：150 分。
-- 并写入 `point_transactions` 与 `users.total_points`。
+- ~~限流：每个 `user_id` 每分钟最多 5 次调用。~~
+- ~~校验评论是否“有意义”：~~
+  - ~~至少 10 个字符，且至少 3 个单词。~~
+- ~~每日每个用户仅可获得一次评论奖励：~~
+  - ~~通过检查当天是否存在 `transaction_type = 'comment_reward'` 的记录。~~
+- ~~奖励积分：~~
+  - ~~若用户为 `Explorer Member`：50 分。~~
+  - ~~其他会员：150 分。~~
+- ~~并写入 `point_transactions` 与 `users.total_points`。~~
 
 ---
 
@@ -431,37 +431,38 @@
   - 填写邮箱、姓名、电话、机器人名称等信息。
 - 保存到 `reserve_info`，并异步发送预约说明邮件。
 
-### 2. 三种 TeleOp 机械臂与会员权限（arm1/arm2/arm3）
+### 2. TeleOp 机械臂与会员权限（按 robot_class，PRIS-130）
 
-- **机械臂概览**
-  - `arm1`：Training Arm（训练臂，常规练习与积分获取）。
-  - `arm2`：Monad Arm（活动臂，对应 Monad 排行与奖励活动）。
-  - `arm3`：Buddy Arm（Buddy 臂，偏向新人体验与高等级会员特权）。
+- **机械臂身份由后端驱动**
+  - 后端 `robot_status` 表提供 `robot_id`、**`robot_class`**、**`robot_name`**、**`robot_slug`**。
+  - 前端路由为 **`/tele-op/:robotSlug`**（不再使用 `/tele-op/:robotId`），名称与类型均来自接口，便于后续新增或重配机器人。
+  - **`robot_class`** 取值决定排队与限制规则：
+    - **`training`**（如原 arm1/arm4）：训练臂，Amplifier 每日 3 次入队上限。
+    - **`open`**（如原 arm3）：开放臂，Amplifier 终身 3 次使用上限。
+    - **`access`**（如原 arm2）：邀请制/活动臂，需邀请码与 Monad 校验，无额外次数上限。
 
 - **Explorer Member**
-  - 禁止使用所有机器人：尝试加入 `arm1/arm2/arm3` 任意队列将直接返回 **403**，统一文案为 `"Explorer tier cannot use robots"`。
+  - 禁止使用所有机器人：尝试加入任意机器人队列将直接返回 **403**，统一文案为 `"Explorer tier cannot use robots"`。
   - 因此 Explorer 不会在 `tele_op_control_history` 中形成新的 TeleOp 控制记录。
 
 - **Amplifier Member**
-  - `arm1`（Training Arm）：
+  - **`robot_class == 'training'`**（原 Training Arm）：
     - 按 **UTC 自然日**统计入队次数，每日最多成功入队 **3 次**（基于 `robot_queue.created_at`）。
-    - 第 4 次及之后尝试入队将返回 403，错误信息中包含 “arm1 ... 3 times per day (UTC)”。
-  - `arm3`（Buddy Arm）：
-    - 针对 `arm3` 采用 **终身总次数**限制：累计成功使用 **3 次**后，再次入队会返回 403，错误信息中包含 “3 total uses limit for arm3”。
-    - 该统计基于 `tele_op_control_history.robot_id = 'arm3'`。
-  - `arm2`（Monad Arm）：
-    - 当前版本在会员维度**无额外单独次数限制**，仅受通用排队/互斥与 Fast Track 规则约束（详见 TeleOp 服务说明），可正常加入队列并控制。
+    - 第 4 次及之后返回 403，错误信息中含该机器人的 `robot_name`，如 “Amplifier members can join the queue for {robot_name} up to 3 times per day (UTC)”。
+  - **`robot_class == 'open'`**（原 Buddy Arm）：
+    - **终身总次数**限制：该机器人累计成功使用 **3 次**后，再次入队返回 403，错误信息以 “Amplifier members have reached the 3 total uses limit for” 开头并含 `robot_name`，前端据此弹升级弹窗。
+    - 统计基于 `tele_op_control_history` 中该 `robot_id` 的记录。
+  - **`robot_class == 'access'`**（原 Partner/Monad Arm）：
+    - 当前版本在会员维度**无额外单独次数限制**，仅受通用排队/互斥、邀请码与 Fast Track 规则约束（详见 TeleOp 服务说明），可正常加入队列并控制。
 
 - **Innovator Member**
-  - 可使用 **所有机器人**（`arm1/arm2/arm3`），不受 Explorer 的全局禁用规则限制。
-  - Fast Track（抢占队列）配额从“每台机器人 8 次/日”统一调整为：
-    - **“全机器人合计每天 6 次 Fast Track”**：当日第 1–6 次 Fast Track 请求正常生效；
-    - 第 7 次及之后请求时接口仍允许入队，但不再标记为 Fast Track，并返回提示 `"maximum 6 fast track a day"`。
-  - 这 6 次 Fast Track 配额在 `arm1/arm2/arm3` 之间**共享**，由 `tele_op_control_history` 与队列逻辑联合控制。
+  - 可使用 **所有机器人**，不受 Explorer 的全局禁用规则限制。
+  - Fast Track（抢占队列）配额：**全机器人合计每天 6 次 Fast Track**；当日第 1–6 次正常生效，第 7 次及之后仍可入队但不标记为 Fast Track，并返回提示如 “You have reached the maximum 6 fast tracks a day. Please come back tomorrow.”。
+  - 6 次配额在所有机器人之间**共享**，由 `tele_op_control_history` 与队列逻辑联合控制。
 
 - **通用队列互斥（所有会员等级生效）**
   - 用户若在任一机器人队列中处于 `waiting/active` 状态，尝试加入另一台机器人队列会被拒绝，统一返回 403，提示已在其他机器人队列中。
-  - 该规则对 `arm1/arm2/arm3` 一视同仁，防止同一账号并发占用多台机器人。
+  - 该规则对所有 `robot_id` 一视同仁，防止同一账号并发占用多台机器人。
 
 ### 3. 用户统计 `/api/user-stats`
 
@@ -506,18 +507,18 @@ This document summarizes the core business logic of Prismax user management (use
     - `Amplifier Member`: upgraded via a $99 payment.
     - `Innovator Member`: further upgraded via a $399 payment.
   - Some **advanced features** are only available to specific tiers, for example:
-    - **TeleOp robot remote control**:
-      - Explorer: completely blocked from using all TeleOp robots (joining any `arm1/arm2/arm3` queue returns 403).
+    - **TeleOp robot remote control** (from PRIS-130, rules keyed by backend `robot_status.robot_class`; names and slugs from `robot_name` / `robot_slug`):
+      - Explorer: completely blocked from using all TeleOp robots (joining any robot queue returns 403).
       - Amplifier:
-        - Training Arm (`arm1`): at most **3 successful queue joins per UTC day** (counted by `robot_queue.created_at`); the 4th and later attempts return 403.
-        - Buddy Arm (`arm3`): at most **3 lifetime uses** in total for TeleOp sessions (counted from `tele_op_control_history.robot_id='arm3'`).
-        - Monad Arm (`arm2`): currently has **no additional per-tier usage cap**; it is only constrained by the generic queue / Fast Track rules.
+        - **`robot_class == 'training'`** (e.g. former arm1/arm4): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error message including that robot’s `robot_name`.
+        - **`robot_class == 'open'`** (e.g. former arm3): at most **3 lifetime uses** for that robot; error message starts with “Amplifier members have reached the 3 total uses limit for” and includes `robot_name`; frontend shows upgrade modal based on this prefix.
+        - **`robot_class == 'access'`** (e.g. former arm2): requires invite code and Monad wallet/purchase check; **no additional per-tier usage cap**, only generic queue / Fast Track rules.
         - Amplifier users **cannot** reserve robots.
       - Innovator: has access to all TeleOp features, including Fast Track queue-jumping and all three arms, and enjoys higher point multipliers.
     - **Robot reservation `/api/reserve-robot`**:
       - Only available to Innovator Members, used to book in-person demos or remote TeleOp experiences (requires `user_id + token` verification).
     - **Fast Track (TeleOp queue jump)**:
-      - Only Innovators can use Fast Track, with a shared limit of 6 Fast Track uses per UTC day across `arm1/arm2/arm3`.
+      - Only Innovators can use Fast Track, with a shared limit of 6 Fast Track uses per UTC day across all robots; message when limit reached: e.g. “maximum 6 fast tracks a day”.
 
 - **Dual-channel account system: multi-chain wallets + email**
   - Users can enter the system either via **email** or via **wallet address**.
@@ -897,17 +898,17 @@ Flow:
     - Extra 1,000 points if all answers are correct.
   - Write to `point_transactions` and update `users.total_points`.
 
-### 5. Comment Reward `/api/check-comment-reward`
+### 5. ~~Comment Reward `POST /api/check-comment-reward`~~ (temporarily disabled per PRIS-125)
 
-- Rate limiting: each `user_id` can call this API at most 5 times per minute.
+- ~~Rate limiting: each `user_id` can call this API at most 5 times per minute.~~
 - Validate that the comment is “meaningful”:
   - at least 10 characters and at least 3 words.
-- Each user can only receive one comment reward per day:
-  - ensured by checking for existing `transaction_type = 'comment_reward'` records for that day.
-- Reward points:
-  - `Explorer Member`: 50 points.
-  - Other members: 150 points.
-- Also writes to `point_transactions` and updates `users.total_points`.
+- ~~Each user can only receive one comment reward per day:~~
+  - ~~ensured by checking for existing `transaction_type = 'comment_reward'` records for that day.~~
+- ~~Reward points:~~
+  - ~~`Explorer Member`: 50 points.~~
+  - ~~Other members: 150 points.~~
+- ~~Also writes to `point_transactions` and updates `users.total_points`.~~
 
 ---
 
@@ -921,37 +922,33 @@ Flow:
   - Fill in email, name, phone, robot name, and other information.
 - Save into `reserve_info` and asynchronously send a reservation information email.
 
-### 2. Three TeleOp Arms and Membership Permissions (arm1/arm2/arm3)
+### 2. TeleOp Arms and Membership Permissions (by robot_class, PRIS-130)
 
-- **Arm overview**
-  - `arm1`: Training Arm, for regular practice and earning points.
-  - `arm2`: Monad Arm, associated with the Monad leaderboard and campaign rewards.
-  - `arm3`: Buddy Arm, focused on first-time users and premium member privileges.
+- **Robot identity driven by backend**
+  - Backend `robot_status` provides `robot_id`, **`robot_class`**, **`robot_name`**, **`robot_slug`**.
+  - Frontend route is **`/tele-op/:robotSlug`** (no longer `/tele-op/:robotId`); names and types come from the API to support new or reconfigured robots.
+  - **`robot_class`** values:
+    - **`training`** (e.g. former arm1/arm4): Amplifier daily 3-join cap.
+    - **`open`** (e.g. former arm3): Amplifier 3 lifetime uses; frontend shows upgrade modal when error message starts with “Amplifier members have reached the 3 total uses limit for”.
+    - **`access`** (e.g. former arm2): invite-only, Monad check required; no extra usage cap.
 
 - **Explorer Member**
-  - Forbidden from using all robots: attempting to join any of `arm1/arm2/arm3` queues returns **403** with the unified message `"Explorer tier cannot use robots"`.
-  - Therefore, Explorers will not generate new TeleOp control records in `tele_op_control_history`.
+  - Forbidden from using all robots: attempting to join any robot queue returns **403** with `"Explorer tier cannot use robots"`.
+  - Explorers will not generate new TeleOp control records in `tele_op_control_history`.
 
 - **Amplifier Member**
-  - `arm1` (Training Arm):
-    - Daily queue-join limit per UTC day: at most **3 successful queue joins** (based on `robot_queue.created_at`).
-    - The 4th and later attempts return 403 with an error message containing “arm1 ... 3 times per day (UTC)”.
-  - `arm3` (Buddy Arm):
-    - Lifetime total limit: max **3 successful uses** of `arm3`. On and after the 4th, joining the queue returns 403 with “3 total uses limit for arm3”.
-    - This is counted from `tele_op_control_history.robot_id = 'arm3'`.
-  - `arm2` (Monad Arm):
-    - Currently has **no additional member-specific usage limit**; only general queue/mutual-exclusion and Fast Track rules apply (see TeleOp service docs). Amplifiers can join and control normally.
+  - **`robot_class == 'training'`** (e.g. Training Arm): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error including that robot’s `robot_name`.
+  - **`robot_class == 'open'`** (e.g. Buddy Arm): **3 lifetime uses** for that robot; 4th join returns 403 with message starting “Amplifier members have reached the 3 total uses limit for” + `robot_name`; frontend uses this to show upgrade modal. Count from `tele_op_control_history` for that `robot_id`.
+  - **`robot_class == 'access'`** (e.g. Monad Arm): **no additional member-specific limit**; only general queue/mutual-exclusion, invite code, and Fast Track rules (see TeleOp service docs). Amplifiers can join and control normally.
 
 - **Innovator Member**
-  - Can use **all robots** (`arm1/arm2/arm3`), unaffected by the Explorer global prohibition.
-  - Fast Track (queue jump) quota is unified from “8 times per day per robot” to:
-    - **“6 Fast Track uses per day across all robots”**: the first 6 Fast Track requests per UTC day are honored;
-    - The 7th and later requests still allow queue joining but are not marked as Fast Track, and the response includes `"maximum 6 fast track a day"`.
-  - These 6 Fast Track uses are **shared** across `arm1/arm2/arm3`, enforced via `tele_op_control_history` and the queue logic.
+  - Can use **all robots**, unaffected by Explorer global prohibition.
+  - Fast Track: **6 Fast Track uses per UTC day across all robots**; 7th and later still allow join but are not Fast Track, with message e.g. “You have reached the maximum 6 fast tracks a day. Please come back tomorrow.”.
+  - These 6 uses are **shared** across all robots, enforced via `tele_op_control_history` and queue logic.
 
 - **Global queue mutual exclusion (applies to all tiers)**
-  - If a user is in `waiting/active` state in any robot queue, attempts to join another robot’s queue are rejected with 403 and a message indicating they are already in another robot’s queue.
-  - This rule applies equally to `arm1/arm2/arm3`, preventing a single account from concurrently occupying multiple robots.
+  - If a user is in `waiting/active` in any robot queue, joining another robot’s queue is rejected with 403.
+  - This rule applies to all `robot_id`s, preventing a single account from occupying multiple robots at once.
 
 ### 3. User Stats `/api/user-stats`
 
