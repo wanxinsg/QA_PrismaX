@@ -62,7 +62,7 @@ A quality validation tool for MCAP files based on best practices for robot arm d
 
 ```bash
 # Clone or enter project directory
-cd QA_PrismaX/Mcap_Checker
+cd QA_PrismaX/QA_Mcap_Checker
 
 # Install dependencies
 pip install -r requirements.txt

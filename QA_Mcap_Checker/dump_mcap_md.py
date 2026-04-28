@@ -206,7 +206,7 @@ def main() -> None:
     if not target.exists():
         raise SystemExit(f"MCAP path not found: {target}")
 
-    # Reports directory under this tool's root (Mcap_Checker/Reports)
+    # Reports directory under this tool's root (QA_Mcap_Checker/Reports)
     project_root = Path(__file__).parent
     reports_dir = project_root / "Reports"
     reports_dir.mkdir(exist_ok=True, parents=True)

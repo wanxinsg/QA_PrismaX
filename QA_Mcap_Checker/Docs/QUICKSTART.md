@@ -5,7 +5,7 @@
 ### 1. Install Dependencies
 
 ```bash
-cd /Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Mcap_Checker
+cd /Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/QA_Mcap_Checker
 pip install -r requirements.txt
 ```
 
