@@ -1,16 +1,16 @@
 #!/bin/bash
 #
-# 安装 Daily Pull 的 launchd 任务（支持 9:00 定时 + 醒来/登录后补跑）
+# 安装 Daily Work 的 launchd 任务（工作日 9:30 + RunAtLoad 在 9:25–9:45 窗口内补跑）
 #
 # 用法: ./setup_launchd.sh
 #
 # 安装后会：
-#   - 每天 9:00 若已登录则执行一次
-#   - 每次登录/唤醒后若当天尚未执行则补跑一次
+#   - 每周一至周五 9:30 若已登录则尝试执行
+#   - 用户登录时（RunAtLoad）若处于 9:25–9:45 且当天尚未执行则补跑一次
 #   - 同一天内最多执行一次（由 run_daily_pull_once.sh 保证）
+#   - 周末不执行（run_daily_pull_once.sh 内 date +%u 判断）
 #
-# 建议：安装本 launchd 后，从 crontab 中移除 Daily Pull 的 9:00 任务，避免重复执行。
-#   删除 cron: crontab -e，删掉包含 daily_pull_testing_branches.py 的那一行
+# 建议：安装本 launchd 后，从 crontab 中移除旧的 Daily Pull 任务，避免重复执行。
 #
 
 set -euo pipefail
@@ -40,13 +40,12 @@ launchctl load "$DST_PLIST"
 echo "✅ launchd 任务已安装并已加载"
 echo ""
 echo "说明:"
-echo "  - 每天 9:00 会执行（若此时已登录）"
-echo "  - 登录或唤醒后若当天尚未执行会补跑一次"
+echo "  - 工作日（周一至周五）每天 9:30 触发"
+echo "  - 脚本仅在 9:25–9:45 内实际运行，且每天最多一次"
 echo "  - 日志: ${SCRIPT_DIR}/daily_pull.log"
 echo "  - launchd 自身输出: ${SCRIPT_DIR}/launchd_stdout.log, launchd_stderr.log"
-echo ""
-echo "⚠️  请从 crontab 中移除 Daily Pull 的 9:00 任务，避免同一天跑两次："
-echo "   crontab -e  →  删除包含 daily_pull_testing_branches.py 的那一行"
+echo "  - LLM 依赖: pip install -r ${SCRIPT_DIR}/requirements-daily-work.txt"
+echo "  - 密钥可放在 daily_pull_env.local.sh（已 .gitignore）"
 echo ""
 echo "常用命令:"
 echo "  查看状态: launchctl list | grep prismax"

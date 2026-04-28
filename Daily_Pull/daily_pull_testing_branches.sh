@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 每日拉取三个仓库的testing分支并发送邮件报告
+# 每日拉取多个仓库的testing分支并发送邮件报告
 #
 # 用法:
 #   ./daily_pull_testing_branches.sh

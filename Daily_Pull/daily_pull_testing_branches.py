@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-每日拉取三个仓库的testing分支并发送邮件报告
+每日拉取多个仓库的testing分支并发送邮件报告
 
 用法:
     python3 daily_pull_testing_branches.py
@@ -28,6 +28,14 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+# 默认与 Prismax 主仓并列的四个 repo 目录名（PROJECT_ROOT 下）
+REPOSITORIES = [
+    "app-prismax-rp",
+    "app-prismax-rp-backend",
+    "gateway-prismax-rp",
+    "roarm-m3-web",
+]
+
 
 class GitPullResult:
     """Git拉取结果"""
@@ -44,6 +52,9 @@ class GitPullResult:
         self.pulled = False
         self.changes_summary = ""
         self.commit_list = []  # 存储提交列表（commit hash和message）
+        # pull 前、后的完整 commit SHA，供 git diff old..new（失败或未 pull 时为空字符串）
+        self.old_commit_sha = ""
+        self.new_commit_sha = ""
 
     def __str__(self):
         status = "✅ 成功" if self.success else "❌ 失败"
@@ -62,7 +73,9 @@ def get_project_root() -> Path:
     return script_dir.parent.parent
 
 
-def run_git_command(repo_path: Path, command: List[str]) -> Tuple[bool, str, str]:
+def run_git_command(
+    repo_path: Path, command: List[str], timeout: int = 60
+) -> Tuple[bool, str, str]:
     """
     执行git命令
     
@@ -75,7 +88,7 @@ def run_git_command(repo_path: Path, command: List[str]) -> Tuple[bool, str, str
             cwd=repo_path,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=timeout,
             check=False
         )
         return result.returncode == 0, result.stdout.strip(), result.stderr.strip()
@@ -133,6 +146,7 @@ def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
     if not success:
         result.error_message = "无法获取当前commit"
         return result
+    result.old_commit_sha = old_commit
     
     # 拉取最新代码
     success, stdout, stderr = run_git_command(repo_path, ["pull", "origin", "testing"])
@@ -145,6 +159,7 @@ def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
     # 获取拉取后的commit信息
     success, new_commit, _ = run_git_command(repo_path, ["rev-parse", "HEAD"])
     if success:
+        result.new_commit_sha = new_commit
         result.latest_commit = new_commit[:8]  # 只显示前8位
         
         # 获取commit详细信息
@@ -337,16 +352,9 @@ def main():
     project_root = get_project_root()
     print(f"项目根目录: {project_root}")
     
-    # 定义要拉取的仓库
-    repositories = [
-        "app-prismax-rp",
-        "app-prismax-rp-backend",
-        "gateway-prismax-rp"
-    ]
-    
     results = []
     
-    for repo_name in repositories:
+    for repo_name in REPOSITORIES:
         repo_path = project_root / repo_name
         print(f"\n处理仓库: {repo_name}")
         print(f"路径: {repo_path}")

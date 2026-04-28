@@ -3,32 +3,25 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.prismax.daily_pull</string>
+    <string>com.prismax.gitpull.daily</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/bin/env</string>
-        <string>bash</string>
-        <string>/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Daily_Pull/run_daily_pull_once.sh</string>
+        <string>/bin/bash</string>
+        <string>-l</string>
+        <string>-c</string>
+        <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/pull_repos.sh</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Daily_Pull</string>
-    <!-- 每天 9:00 若已登录则执行 -->
+    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull</string>
+    <!-- 每天 09:00 主触发 -->
     <key>StartCalendarInterval</key>
     <dict>
-        <key>Hour</key>
-        <integer>9</integer>
-        <key>Minute</key>
-        <integer>0</integer>
+        <key>Hour</key><integer>9</integer>
+        <key>Minute</key><integer>0</integer>
     </dict>
-    <!-- 兜底：每 60 分钟检查一次，由脚本内部的 .last_run_date 逻辑保证同一天只会真正执行一次 -->
-    <key>StartInterval</key>
-    <integer>3600</integer>
-    <!-- 登录/首次加载本 agent 时执行一次（登录时），用于补跑（若当天未跑过则跑） -->
-    <key>RunAtLoad</key>
-    <true/>
     <key>StandardOutPath</key>
-    <string>/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Daily_Pull/launchd_stdout.log</string>
+    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/log/daily_stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/wanxin/PycharmProjects/Prismax/QA_PrismaX/Daily_Pull/launchd_stderr.log</string>
+    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/log/daily_stderr.log</string>
 </dict>
 </plist>

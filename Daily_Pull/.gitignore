@@ -11,9 +11,15 @@ daily_pull.log
 launchd_stdout.log
 launchd_stderr.log
 
+# Daily Work pause switch (local)
+.daily_work_pause_from
+
 # Environment config (may contain sensitive info)
 # Uncomment the line below if you don't want to track daily_pull_env.sh
 # daily_pull_env.sh
+
+# Local overrides (API keys / SMTP); never commit
+daily_pull_env.local.sh
 
 # Python cache
 __pycache__/
