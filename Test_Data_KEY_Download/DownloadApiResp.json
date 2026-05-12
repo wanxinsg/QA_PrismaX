@@ -1,0 +1,139 @@
+{
+  "data": {
+    "auth": {
+      "cookie_name": "Cloud-CDN-Cookie",
+      "scope": "sample_or_asset",
+      "type": "cloud_cdn_signed_cookie"
+    },
+    "created_at": "2026-05-11T03:02:56.190845Z",
+    "data_format": "mcap/mp4",
+    "download_id": 154,
+    "expires_at": "2026-05-12T03:02:56.190691Z",
+    "manifest_version": 2,
+    "mode": "api_cdn",
+    "package_id": "pkg_jIUHP03Pp-ZOKIX0XuUsPQc0",
+    "samples": [
+      {
+        "assets": {
+          "env": {
+            "path": "raw/51/0/cam_high.mp4",
+            "relative_path": "0/cam_high.mp4",
+            "size_bytes": 12777030,
+            "url": "https://data.prismax.ai/raw/51/0/cam_high.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5129&asset=env"
+          },
+          "left": {
+            "path": "raw/51/0/cam_left.mp4",
+            "relative_path": "0/cam_left.mp4",
+            "size_bytes": 14860319,
+            "url": "https://data.prismax.ai/raw/51/0/cam_left.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5129&asset=left"
+          },
+          "mcap": {
+            "path": "raw/51/0.mcap",
+            "relative_path": "0.mcap",
+            "size_bytes": 1901345,
+            "url": "https://data.prismax.ai/raw/51/0.mcap?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5129&asset=mcap"
+          },
+          "right": {
+            "path": "raw/51/0/cam_right.mp4",
+            "relative_path": "0/cam_right.mp4",
+            "size_bytes": 15801456,
+            "url": "https://data.prismax.ai/raw/51/0/cam_right.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5129&asset=right"
+          }
+        },
+        "auth": {
+          "cookie_header": "Cloud-CDN-Cookie=URLPrefix=aHR0cHM6Ly9kYXRhLnByaXNtYXguYWkvcmF3LzUxLw==:Expires=1778554976:KeyName=raw-key-202605:Signature=V6XusoE64P-wAlfxllp6cjTyOVc=",
+          "cookie_name": "Cloud-CDN-Cookie",
+          "type": "cloud_cdn_signed_cookie",
+          "url_prefix": "https://data.prismax.ai/raw/51/"
+        },
+        "data_format": "mcap/mp4",
+        "episode_id": 5129,
+        "episode_key": "0",
+        "task_id": 23,
+        "task_name": "Sort toys by category",
+        "upload_id": 51
+      },
+      {
+        "assets": {
+          "env": {
+            "path": "raw/53/0/cam_high.mp4",
+            "relative_path": "0/cam_high.mp4",
+            "size_bytes": 11832769,
+            "url": "https://data.prismax.ai/raw/53/0/cam_high.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5446&asset=env"
+          },
+          "left": {
+            "path": "raw/53/0/cam_left.mp4",
+            "relative_path": "0/cam_left.mp4",
+            "size_bytes": 22712959,
+            "url": "https://data.prismax.ai/raw/53/0/cam_left.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5446&asset=left"
+          },
+          "mcap": {
+            "path": "raw/53/0.mcap",
+            "relative_path": "0.mcap",
+            "size_bytes": 832133,
+            "url": "https://data.prismax.ai/raw/53/0.mcap?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5446&asset=mcap"
+          },
+          "right": {
+            "path": "raw/53/0/cam_right.mp4",
+            "relative_path": "0/cam_right.mp4",
+            "size_bytes": 34965579,
+            "url": "https://data.prismax.ai/raw/53/0/cam_right.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=5446&asset=right"
+          }
+        },
+        "auth": {
+          "cookie_header": "Cloud-CDN-Cookie=URLPrefix=aHR0cHM6Ly9kYXRhLnByaXNtYXguYWkvcmF3LzUzLw==:Expires=1778554976:KeyName=raw-key-202605:Signature=iCvzvquw_nVbZTwRGfTWwlEt7no=",
+          "cookie_name": "Cloud-CDN-Cookie",
+          "type": "cloud_cdn_signed_cookie",
+          "url_prefix": "https://data.prismax.ai/raw/53/"
+        },
+        "data_format": "mcap/mp4",
+        "episode_id": 5446,
+        "episode_key": "0",
+        "task_id": 43,
+        "task_name": "Sort assorted pastries by type",
+        "upload_id": 53
+      },
+      {
+        "assets": {
+          "env": {
+            "path": "raw/89/0/cam_high.mp4",
+            "relative_path": "0/cam_high.mp4",
+            "size_bytes": 76653145,
+            "url": "https://data.prismax.ai/raw/89/0/cam_high.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=7860&asset=env"
+          },
+          "left": {
+            "path": "raw/89/0/cam_left.mp4",
+            "relative_path": "0/cam_left.mp4",
+            "size_bytes": 76596977,
+            "url": "https://data.prismax.ai/raw/89/0/cam_left.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=7860&asset=left"
+          },
+          "mcap": {
+            "path": "raw/89/0.mcap",
+            "relative_path": "0.mcap",
+            "size_bytes": 2518542,
+            "url": "https://data.prismax.ai/raw/89/0.mcap?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=7860&asset=mcap"
+          },
+          "right": {
+            "path": "raw/89/0/cam_right.mp4",
+            "relative_path": "0/cam_right.mp4",
+            "size_bytes": 80532128,
+            "url": "https://data.prismax.ai/raw/89/0/cam_right.mp4?download_id=154&package_id=pkg_jIUHP03Pp-ZOKIX0XuUsPQc0&user_id=1225411&episode_id=7860&asset=right"
+          }
+        },
+        "auth": {
+          "cookie_header": "Cloud-CDN-Cookie=URLPrefix=aHR0cHM6Ly9kYXRhLnByaXNtYXguYWkvcmF3Lzg5Lw==:Expires=1778554976:KeyName=raw-key-202605:Signature=DRWJbdtAYZHYwOqcmMa0JJQHdt8=",
+          "cookie_name": "Cloud-CDN-Cookie",
+          "type": "cloud_cdn_signed_cookie",
+          "url_prefix": "https://data.prismax.ai/raw/89/"
+        },
+        "data_format": "mcap/mp4",
+        "episode_id": 7860,
+        "episode_key": "0",
+        "task_id": 26,
+        "task_name": "Sort slippers into bins by color/type",
+        "upload_id": 89
+      }
+    ]
+  },
+  "success": true
+}
