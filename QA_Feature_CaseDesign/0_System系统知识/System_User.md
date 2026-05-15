@@ -2,19 +2,24 @@
 
 本文基于 `app_prismax_user_management/app.py` 及相关辅助模块，总结 Prismax 用户管理（user_management）的核心业务逻辑，供需求、测试与排查参考。
 
+> 最近更新：2026-05-15
+
 ---
 
 ## 一、整体概览
 
 - **身份标识与登录方式并存**
   - 支持 **邮箱验证码登录**（无固定密码）、第三方登录（Google/Apple，经 `login_type` 区分）、以及 **多链钱包登录**（Solana/Ethereum/Base/Monad/Aptos）。
-  - 系统统一使用 `users.hash_code` 作为“长效登录令牌”（token），前端通常通过 `Authorization: Bearer <hash_code>` 传回认证。
+  - 系统统一使用 `users.hash_code` 作为"长效登录令牌"（token），前端通常通过 `Authorization: Bearer <hash_code>` 传回认证。
 
 - **多角色 / 会员等级体系**
   - `users.user_class` 字段定义会员等级：
     - `Explorer Member`：默认免费用户。
     - `Amplifier Member`：99 美金付费升级。
     - `Innovator Member`：399 美金进一步升级。
+  - 新增 **`users.user_role`** 字段，用于标识功能性角色（与会员等级独立）：
+    - `operator`：机器人操作员，可注册机器人并上传数据，需申请审核通过。
+    - `qa` / `senior qa` / `expert qa`：QA 审核员，由管理员分配。
   - 部分**高级功能**仅对特定会员等级开放，典型包括：
     - **TeleOp 机器人远程控制**（PRIS-130 起按后端 `robot_status.robot_class` 区分，名称与 slug 由后端 `robot_name` / `robot_slug` 提供）：
       - Explorer：完全禁止使用所有 TeleOp 机器人（加入任意机器人队列都会返回 403）。
@@ -31,7 +36,7 @@
 
 - **多链钱包 + 邮箱双渠道账户体系**
   - 用户既可以从 **邮箱** 进入，也可以从 **钱包地址** 进入。
-  - 通过 `linked_email`、`linked_wallet_address` 将“邮箱账户”和“钱包账户”建立绑定关系，统一视为同一用户身份。
+  - 通过 `linked_email`、`linked_wallet_address` 将"邮箱账户"和"钱包账户"建立绑定关系，统一视为同一用户身份。
 
 - **积分与权益体系深度绑定**
   - 积分累积方式：首次登录奖励、每日登录、测验问卷、~~评论奖励~~（已因 PRIS-125 暂时关闭）、推荐关系分成等，均通过 `point_transactions` + `users.total_points` 管理。
@@ -42,8 +47,15 @@
   - 支付金额满足条件时，自动将用户会员等级从 `Explorer → Amplifier → Innovator` 升级。
 
 - **外部服务绑定**
-  - Twitter OAuth：绑定到用户记录的 `user_profile_twitter_id`、`user_profile_twitter_name`。
+  - Twitter OAuth：绑定到用户记录的 `user_profile_twitter_id`、`user_profile_twitter_name`；支持解绑。
+  - **Discord OAuth（新增）**：绑定到用户记录的 `user_profile_discord_id`、`user_profile_discord_name`；支持解绑。
   - YouTube 仅作为监控/告警使用，不直接影响用户身份，但和 `robot_status`、系统管理员通知相关。
+
+- **Beta 内测访问控制（新增）**
+  - 系统支持 Beta 阶段通过一次性访问码（`BETA_ACCESS_CODE`）限制用户访问，校验通过后颁发 24 小时 JWT Beta Token。
+
+- **Operator（操作员）系统（新增）**
+  - 普通用户可注册自有机器人（`data_machines` 表）、提交 Operator 成员资格申请，经管理员审核通过后获得 `operator` 角色，可向 VLA Foundry 上传机器人操作数据并在 Operator Dashboard 查看数据统计。
 
 ---
 
@@ -57,7 +69,7 @@
 - `userid`：主键，自增。
 - `email`：登录邮箱（可为空，用于邮箱体系）。
 - `login_type`：登录类型，`'0'` 表示邮箱验证码登录，其他值用于 Google/Apple 等第三方。
-- `hash_code`：当前登录 token，相当于“会话/长期登录令牌”，每次成功登录或登出都会刷新。
+- `hash_code`：当前登录 token，相当于"会话/长期登录令牌"，每次成功登录或登出都会刷新。
 
 **钱包与链上地址（多链）**
 - `solana_receive_address`
@@ -74,9 +86,12 @@
 - `user_class`：会员等级（`Explorer Member` / `Amplifier Member` / `Innovator Member`）。
 - `total_points`：当前可用积分总数。
 - `referral_code`：该用户对外分享的推荐码。
-- `referrers_referral_code`：该用户注册时填写的推荐人推荐码（即“我是谁拉来的”）。
+- `referrers_referral_code`：该用户注册时填写的推荐人推荐码（即"我是谁拉来的"）。
 - `referred_reward_point`：推荐 10% 分成已结算积分（防止重复结算）。
 - `referral_initial_reward`：初始邀请奖励（每个被邀请人 500 积分）已发放总额。
+
+**角色体系（新增）**
+- `user_role`：功能性角色，取值：`operator`（已审核通过的操作员）、`qa` / `senior qa` / `expert qa`（QA 审核员）。与 `user_class` 独立，由管理员授权或申请审核流程写入。
 
 **个人资料 / 联系方式**
 - `user_name`：昵称。
@@ -87,6 +102,8 @@
 **外部账号绑定**
 - `user_profile_twitter_id`
 - `user_profile_twitter_name`
+- `user_profile_discord_id`（新增）
+- `user_profile_discord_name`（新增）
 
 **其他**
 - `created_at`：创建时间，用于判断首次登录、异常行为等。
@@ -144,6 +161,17 @@
 - `detected_bot_users`：机器人刷分检测结果记录。
 - `verify_payment_records`：多链/Stripe 的对账快照结果。
 
+### 6. Operator 相关表（新增）
+
+- `data_machines`：操作员注册的机器人，包含 `machine_id`、`manufacture`、`product_name`、`serial_number`、`user_id`、`is_default_producer`。
+- `data_sample_machines`：系统维护的机器人型号标准库（由管理员通过 VLA Admin 接口管理），Operator 注册时需从中选择。
+- `data_operator_applications`：Operator 成员资格申请记录，包含 `user_id`、`email`、`admin_review_status`（`pending` / `approved` / `denied`）、`created_at`、`admin_reviewed_at`。
+- `data_uploads`：Operator 上传的数据记录，含 `machine_id`、`user_id` 等。
+- `data_episodes`：上传数据中的单集 episode，含 `upload_id`、`status`、`video_duration_hours`。
+- `data_tasks`：VLA 任务配置表，由管理员通过 VLA Admin 接口管理。
+- `data_qa_sessions`：QA 审核会话记录，含 `user_id`、`qa_score`，用于统计 QA 审核员工作量与评分。
+- `admin_invite_codes`：管理员邀请码，用于邀请用户进入系统（一次性使用）。
+
 ---
 
 ## 三、认证与登录流程
@@ -152,7 +180,7 @@
 
 **主要步骤：**
 1. 输入：`email`，同时携带 `recaptchaToken`（v3）与 `recaptchaV2Token`（v2）。
-2. 先做“紧急邮件模式拦截”：部分 Hotmail 规则匹配到的明显机器邮箱将直接做“假发送”，但不会真正发送邮件。
+2. 先做"紧急邮件模式拦截"：部分 Hotmail 规则匹配到的明显机器邮箱将直接做"假发送"，但不会真正发送邮件。
 3. 校验同一邮箱 30 秒冷却时间，防止频繁请求。
 4. 使用 reCAPTCHA v3 与 v2 双重校验：
    - v3 `score` 必须高于 0.3。
@@ -168,7 +196,7 @@
    - 记录是否存在。
    - `code` 是否一致。
    - 是否过期。
-3. 校验通过后，向 `users` 表插入 `email`（已存在则忽略），作为一个“邮箱侧用户”初始记录。
+3. 校验通过后，向 `users` 表插入 `email`（已存在则忽略），作为一个"邮箱侧用户"初始记录。
 
 ### 3. 核心登录保存 `/auth/save`
 
@@ -200,7 +228,7 @@
 
 - **登出** `/logout`
   - 根据 `email` 查找用户。
-  - 若存在，则随机生成新的 `hash_code` 更新，从逻辑上作废原 token（即“服务端旋转 token”）。
+  - 若存在，则随机生成新的 `hash_code` 更新，从逻辑上作废原 token（即"服务端旋转 token"）。
 
 ### 5. 管理员登录 `/api/admin-login`
 
@@ -210,6 +238,19 @@
 - 验证通过后：
   - 生成 JWT `access_token`（30 分钟）、`refresh_token`，`role` 声明为 `admin`。
   - 后续部分后台接口使用 `@jwt_required()` + `get_jwt_identity()` 进行鉴权。
+
+### 6. Beta 内测访问控制（新增）
+
+- **验证 Beta 访问码** `/auth/beta/verify-access-code`
+  - 入参：`access_code`。
+  - 限流：每分钟最多 10 次调用（防暴力破解）。
+  - 使用 `hmac.compare_digest` 进行常量时间比较，防止时序攻击。
+  - 校验通过后，颁发 24 小时 JWT Beta Token（`typ: "beta"`）。
+  - 失败时记录来源 IP 到日志。
+
+- **验证 Beta Token** `/auth/beta/validate-token`
+  - 入参：`beta_token`。
+  - 验证 JWT 签名与过期时间，返回 `success: true` 或具体失败原因（过期 / 无效）。
 
 ---
 
@@ -230,7 +271,7 @@
    - 有 `wallet_address` 时：
      - 通过 `CHAIN_COLUMN_MAP[chain]` 找到对应列（如 `solana_receive_address`）。
      - 在 `users` 中按该地址查找。
-     - 若找到了钱包用户，且其 `linked_email` 不为空，则优先返回该邮箱用户的信息（即“邮箱是主身份”）。
+     - 若找到了钱包用户，且其 `linked_email` 不为空，则优先返回该邮箱用户的信息（即"邮箱是主身份"）。
      - 若没找到该钱包用户，则：
        - 调用链上接口检查该钱包在对应链是否有余额。
        - 有余额才允许创建用户记录，并分配新的 `hash_code`。
@@ -239,7 +280,7 @@
 5. 同时存在 `email` 与 `wallet_address` 时：
    - 若二者均找到对应用户：
      - 如果钱包用户已经是高等级会员（`Amplifier` 或 `Innovator`），则阻止将其绑到另一个邮箱账户上，防止滥用。
-     - 对历史绑定关系进行“解绑再重绑”，确保：
+     - 对历史绑定关系进行"解绑再重绑"，确保：
        - 当前 email 的 `linked_wallet_address` 指向此钱包。
        - 当前 wallet 记录的 `linked_email` 指向此 email。
    - 绑定完成后，最终返回以邮箱用户为主的完整信息。
@@ -265,11 +306,11 @@
   - 钱包用户：必须携带 `wallet_address + chain + token(hash_code)`，后端按链路列 + `hash_code` 精确匹配。
   - 所有编辑类接口都会在找不到匹配用户或 token 失效时返回 401/403，防止越权修改他人资料。
 - **字段更新策略**：
-  - 只允许更新“白名单字段”（昵称、社交账号、电话、对外邮箱等），不会修改 `user_class`、积分、推荐码等敏感字段。
+  - 只允许更新"白名单字段"（昵称、社交账号、电话、对外邮箱等），不会修改 `user_class`、积分、推荐码等敏感字段。
   - 采用 **动态 SQL**：仅对请求中实际出现的字段生成 `SET` 子句，避免无意覆盖为 `NULL`。
 - **安全与审计**：
   - 对外邮箱修改强制二次邮箱验证码校验（见下一小节）。
-  - Twitter 等第三方绑定通过 OAuth 回调写入，避免用户直接提交第三方 ID。
+  - Twitter、Discord 等第三方绑定通过 OAuth 回调写入，避免用户直接提交第三方 ID。
 
 ### 1. 更新基本资料 `/api/update-user-info`
 
@@ -293,7 +334,7 @@
    - 通过 `userid + hash_code` 再次校验登录态。
    - 更新 `users.user_profile_email` 为新邮箱。
 
-### 3. Twitter OAuth 绑定
+### 3. Twitter OAuth 绑定与解绑
 
 **发起绑定 `/auth/twitter/initiate`：**
 - 入参：`email` 或 `wallet_address` + `chain`，以及 `token`。
@@ -309,6 +350,30 @@
   - 验证其中 token 哈希与当前数据库中 `hash_code` 一致，防止中途用户登出或 token 被劫持。
 - 使用授权码换取 Twitter access token，再调接口获取 `id` 与 `username`。
 - 将 `user_profile_twitter_id`、`user_profile_twitter_name` 写入对应 `users` 记录。
+
+**解绑 `/api/user-profile/twitter-unlink`（新增）：**
+- 入参：`email` 或 `wallet_address + chain`，以及 `token`。
+- 按身份验证找到用户，将 `user_profile_twitter_id` 和 `user_profile_twitter_name` 置为 `NULL`。
+- 若原本未绑定，返回成功（幂等）。
+
+### 4. Discord OAuth 绑定与解绑（新增）
+
+**发起绑定 `/auth/discord/initiate`：**
+- 入参：`email` 或 `wallet_address + chain`，以及 `token`、`return_url`、`backend_host_url`。
+- 按身份验证找到用户 `userid`，构造 **带 state 的 Discord 授权 URL**，state 中记录：
+  - `user_id`、当前 token 的哈希、回跳 URL。
+- 流程与 Twitter OAuth 类似，使用 `discord_oauth` 模块。
+
+**回调 `/auth/discord/callback`：**
+- 解析并验证 state（签名 + 过期时间 + token 哈希防劫持）。
+- 用授权码换取 Discord access token，调接口获取 `id` 与 `username`。
+- 将 `user_profile_discord_id`、`user_profile_discord_name` 写入对应 `users` 记录。
+- 通过带参数重定向告知前端绑定结果（`discord_status=success/error`）。
+
+**解绑 `/api/user-profile/discord-unlink`：**
+- 入参：`email` 或 `wallet_address + chain`，以及 `token`。
+- 按身份验证找到用户，将 `user_profile_discord_id` 和 `user_profile_discord_name` 置为 `NULL`。
+- 若原本未绑定，返回成功（幂等）。
 
 ---
 
@@ -336,7 +401,7 @@
 
 ### 2. 加密货币支付与会员升级 `/api/record-crypto-payment`
 
-1. 入参：`wallet_address`、`amount_total`（整数，单位“美元”）、`user_id`、`transaction_hash`、`currency`、`chain`。
+1. 入参：`wallet_address`、`amount_total`（整数，单位"美元"）、`user_id`、`transaction_hash`、`currency`、`chain`。
 2. 确认 `chain` 合法。
 3. 如有 `transaction_hash`：
    - 先检查该哈希是否已存在于任一链交易哈希列，防止重复录入。
@@ -410,7 +475,7 @@
 ### 5. ~~评论奖励 `POST /api/check-comment-reward`~~（已因 PRIS-125 暂时关闭）
 
 - ~~限流：每个 `user_id` 每分钟最多 5 次调用。~~
-- ~~校验评论是否“有意义”：~~
+- ~~校验评论是否"有意义"：~~
   - ~~至少 10 个字符，且至少 3 个单词。~~
 - ~~每日每个用户仅可获得一次评论奖励：~~
   - ~~通过检查当天是否存在 `transaction_type = 'comment_reward'` 的记录。~~
@@ -448,50 +513,173 @@
 - **Amplifier Member**
   - **`robot_class == 'training'`**（原 Training Arm）：
     - 按 **UTC 自然日**统计入队次数，每日最多成功入队 **3 次**（基于 `robot_queue.created_at`）。
-    - 第 4 次及之后返回 403，错误信息中含该机器人的 `robot_name`，如 “Amplifier members can join the queue for {robot_name} up to 3 times per day (UTC)”。
+    - 第 4 次及之后返回 403，错误信息中含该机器人的 `robot_name`，如 "Amplifier members can join the queue for {robot_name} up to 3 times per day (UTC)"。
   - **`robot_class == 'open'`**（原 Buddy Arm）：
-    - **终身总次数**限制：该机器人累计成功使用 **3 次**后，再次入队返回 403，错误信息以 “Amplifier members have reached the 3 total uses limit for” 开头并含 `robot_name`，前端据此弹升级弹窗。
+    - **终身总次数**限制：该机器人累计成功使用 **3 次**后，再次入队返回 403，错误信息以 "Amplifier members have reached the 3 total uses limit for" 开头并含 `robot_name`，前端据此弹升级弹窗。
     - 统计基于 `tele_op_control_history` 中该 `robot_id` 的记录。
   - **`robot_class == 'access'`**（原 Partner/Monad Arm）：
     - 当前版本在会员维度**无额外单独次数限制**，仅受通用排队/互斥、邀请码与 Fast Track 规则约束（详见 TeleOp 服务说明），可正常加入队列并控制。
 
 - **Innovator Member**
   - 可使用 **所有机器人**，不受 Explorer 的全局禁用规则限制。
-  - Fast Track（抢占队列）配额：**全机器人合计每天 6 次 Fast Track**；当日第 1–6 次正常生效，第 7 次及之后仍可入队但不标记为 Fast Track，并返回提示如 “You have reached the maximum 6 fast tracks a day. Please come back tomorrow.”。
+  - Fast Track（抢占队列）配额：**全机器人合计每天 6 次 Fast Track**；当日第 1–6 次正常生效，第 7 次及之后仍可入队但不标记为 Fast Track，并返回提示如 "You have reached the maximum 6 fast tracks a day. Please come back tomorrow."。
   - 6 次配额在所有机器人之间**共享**，由 `tele_op_control_history` 与队列逻辑联合控制。
 
 - **通用队列互斥（所有会员等级生效）**
   - 用户若在任一机器人队列中处于 `waiting/active` 状态，尝试加入另一台机器人队列会被拒绝，统一返回 403，提示已在其他机器人队列中。
   - 该规则对所有 `robot_id` 一视同仁，防止同一账号并发占用多台机器人。
 
-### 3. 用户统计 `/api/user-stats`
+### 3. 用户统计
 
-- 需 JWT 管理员权限。
-- 返回：
-  - 各会员等级用户数量（Innovator/Amplifier/Explorer）。
-  - `tele_op_control_history` 中有操作记录的唯一 `user_id` 数量（远程操作活跃用户数）。
+- **`/api/user-stats`**：需 JWT 管理员权限，返回各会员等级用户数量及活跃 TeleOp 用户数。
+- **`/api/user-stats-v2`（新增）**：需 JWT 管理员权限，返回更详细的分类统计：
+  - 按会员等级 × 登录渠道（solana/base/monad/aptos/ethereum/email）交叉统计用户数量（含行列合计）。
+  - 按登录渠道统计 TeleOp 会话数、总时长（小时）、活跃用户数。
 
 ### 4. 管理端相关（简要）
 
 - `admin_whitelist` 的增删查接口：用于配置后台可操作钱包地址。
 - `detect_and_reset_bots()`：
   - 检测未来日期或在项目启动前的积分交易，识别疑似刷分账户，记录到 `detected_bot_users`，并为后续积分重置做准备。
+- **管理员邀请码（新增）**：
+  - `/api/create-admin-invite-code`：管理员创建一次性邀请码（需 JWT 权限）。
+  - `/api/get-admin-invite-codes`：管理员查看所有邀请码及使用状态。
+  - `/api/use-admin-invite-code`：用户凭邀请码绑定账号（一次性，已用则返回 409）。
+  - `/api/check-admin-invite-binding`：用户查询自己是否已被邀请码绑定。
 
 ---
 
-## 九、小结：Prismax 用户管理的关键要点
+## 九、Operator（操作员）系统（新增）
+
+Operator 系统允许拥有真实机器人的用户申请成为平台数据生产者（Operator），向 VLA Foundry 上传操作数据，并在 Operator Dashboard 查看数据统计与审核评分。
+
+### 1. 机器人注册
+
+- **获取可注册型号 `/api/operator/get-robot-registration-options`**
+  - 入参：`user_id`、`token`（Bearer）。
+  - 返回平台支持的机器人制造商与型号列表（来自 `data_sample_machines`，供选择）。
+
+- **验证序列号 `/api/operator/register-robot/validate-serial-number`**
+  - 入参：`user_id`、`token`、`manufacturer`、`model`、`serial_number`。
+  - 按制造商校验序列号格式规则（例如 Airbot：16 位，`PZ` 开头 + 9 位数字结尾；Agilex：23 位，`MD` 开头；I2rt：11 位，`JG` 开头；RealMan：16 位，`RM` 开头）。
+  - 不在已知规则的制造商返回 `valid: null`，已知规则不符返回 `valid: false`，格式正确返回 `valid: true`。
+
+- **注册机器人 `/api/operator/register-robot`**
+  - 入参：`user_id`、`token`、`robot_data`（含 `manufacturer`、`model`、`serial_number`）。
+  - 需要 `manufacturer + model` 在 `data_sample_machines` 中存在（二次校验）。
+  - 同一用户相同 `manufacturer + model + serial_number` 组合不可重复注册（409）。
+  - 首台注册机器人自动设为默认数据生产者（`is_default_producer = true`）。
+  - 写入 `data_machines` 表。
+
+- **注销机器人 `/api/operator/unregister-robot`**
+  - 入参：`user_id`、`token`、`machine_id`。
+  - 防护机制：
+    1. 若删除的是默认生产者且还有其他机器人，仅当剩余 1 台时自动将该台设为新默认；有 2 台以上时拒绝删除，需先手动切换默认。
+    2. 若机器人有上传历史（`data_uploads` 中存在），拒绝删除（409）。
+  - 若删除后该用户没有任何机器人，同时清除 `users.user_role = 'operator'` 及待处理/已通过的 `data_operator_applications`。
+
+- **设置默认数据生产者 `/api/operator/set-default-producer`**
+  - 入参：`user_id`、`token`、`machine_id`。
+  - 用户只有 1 台机器人时不允许切换（无意义）。
+  - 先将该用户所有机器人 `is_default_producer` 置 false，再将目标机器人置 true。
+
+### 2. Operator 成员资格申请
+
+- **获取操作员数据 `/api/operator/get-user-data`**
+  - 入参：`user_id`、`token`（Bearer）。
+  - 返回该用户已注册的机器人列表及 operator_status：
+    - 若 `user_role == 'operator'`：`operator_status = 'approved'`。
+    - 否则查最新 `data_operator_applications` 记录，返回 `pending` / `denied` / `null`。
+
+- **提交成员资格申请 `/api/operator/submit-membership-application`**
+  - 入参：`user_id`、`email`、`token`。
+  - 校验：
+    - 提供的 `email` 必须是该账号已关联的邮箱之一（`email`、`user_profile_email`、`linked_email` 之一）。
+    - 用户必须至少注册 1 台机器人。
+    - 不允许存在已处于 `pending` 状态的申请（重复提交返回 400）。
+  - 通过校验后，向 `data_operator_applications` 插入 `pending` 申请。
+  - 同时给系统管理员邮箱发送告警通知（含当前 pending 总数）。
+
+### 3. 管理端：Operator 申请审核
+
+- **查看申请列表 `/api/admin/get-operator-applications`**（需 JWT）
+  - 按 `status` 参数（`pending` / `approved` / `denied`）筛选，分页返回。
+  - 每条申请包含用户的会员等级、积分、钱包地址及已注册机器人列表。
+
+- **审核申请 `/api/admin/review-operator-application`**（需 JWT）
+  - 入参：`application_id`、`user_id`、`approved`（布尔）。
+  - 批准：将 `users.user_role` 设为 `'operator'`，更新申请状态为 `approved`，并向申请邮箱发送审核通过邮件。
+  - 拒绝：`users.user_role` 置 `NULL`，申请状态更新为 `denied`。
+
+### 4. Operator Dashboard（数据统计面板）
+
+- **汇总统计 `/vla/operator-dashboard/summary`**（Operator 用户自查）
+  - 入参：`token`（Bearer）、`duration`（`7d` / `30d` / `90d` / `1y` / `all`，默认 `30d`）。
+  - 返回当前 Operator 在指定时间范围内的：
+    - 平均 QA 评分（与上期对比 delta）。
+    - 总 episode 数量（与上期对比百分比变化）。
+    - 每日平均上传时长（小时/天）。
+    - QA 评分趋势（按周期分组）。
+    - Episode 时长趋势。
+
+- **上传列表 `/vla/operator-dashboard/uploads`**（Operator 用户自查）
+  - 入参：`token`、`duration`、`machine_id`（可选，按机器人筛选）、`page`、`page_size`（最大 50）。
+  - 返回当前 Operator 的上传分页列表。
+
+- **管理员查看任意 Operator 统计 `/vla/admin/operator-dashboard/summary`** 与 **`/vla/admin/operator-dashboard/uploads`**（需 JWT）
+  - 额外入参 `user_id`，查看指定 Operator 的统计数据与上传列表。
+
+---
+
+## 十、VLA Admin 管理接口（新增）
+
+VLA Admin 接口供内部管理员通过 JWT 管理 VLA 相关的配置数据（均需 JWT 认证）。
+
+### 1. 样本机器人型号管理 `/api/vla-admin/sample-machines`
+
+- **GET**：返回 `data_sample_machines` 表全部数据及列元数据（含类型、`column_details`）。
+- **POST**（Upsert）：按 `machine_id` 插入或更新样本机器人记录，动态校验列类型与约束，返回操作结果行与元数据。
+
+### 2. 任务管理 `/api/vla-admin/tasks`
+
+- **GET**：返回 `data_tasks` 表全部任务及列元数据。
+- **POST**（创建）：创建新任务，支持自动生成 `task_id`（整数序列），支持 `preview_video_upload_id` 解析（通过 `preview_video_helper` 模块）。
+- **PATCH `/api/vla-admin/tasks/<task_id>`**：更新指定任务的字段（动态生成 SET 子句，忽略未知字段）。
+
+---
+
+## 十一、QA 审核员管理（新增）
+
+管理端提供对 QA 审核员角色的管理接口（均需 JWT 认证），QA 审核员角色通过 `users.user_role` 字段区分。
+
+- **查看 QA 审核员列表 `/api/admin/get-qa-reviewers`**
+  - 分页返回所有 `user_role IN ('qa', 'senior qa', 'expert qa')` 的用户。
+  - 每条记录包含：`user_id`、邮箱、钱包地址、角色、历史评审数量（`review_count`）、平均 QA 评分（来自 `data_qa_sessions`）。
+  - 排序：`expert qa > senior qa > qa`，同角色按评审数量降序。
+
+- **设置/取消 QA 角色 `/api/admin/set-qa-reviewer-role`**
+  - 支持通过 `user_id`、邮箱、或钱包地址（`solana/ethereum/base/monad`）查找目标用户。
+  - `user_role` 字段：传入 `qa` / `senior qa` / `expert qa` 之一设置角色；传入空字符串或 `null` 则取消角色。
+
+---
+
+## 十二、小结：Prismax 用户管理的关键要点
 
 - **统一会话模型**：所有登录方式最终都收敛到 `users` 表与 `hash_code` 令牌。
 - **多入口同身份**：通过 `linked_email` 与 `linked_wallet_address`，实现邮箱 + 多链钱包统一账户视图。
+- **双维度角色体系**：`user_class`（会员等级，付费驱动）与 `user_role`（功能角色，审批驱动）相互独立，共同约束用户权限。
 - **会员等级驱动业务**：会员等级影响积分倍率、机器人预约资格等关键权益，并与支付闭环强绑定。
 - **积分体系丰富且防刷**：多种行为驱动积分增长，同时通过 reCAPTCHA、邮箱模式黑名单、时间区间检测等手段抑制机器人行为。
 - **支付与对账机制完备**：Stripe 与多链支付均有记录表和对账快照机制，支持后续财务与风控分析。
+- **Operator 数据生态**：Operator 系统形成完整闭环——注册机器人 → 申请审核 → 上传数据 → QA 评审 → Dashboard 统计，用于支撑 VLA 模型训练数据收集。
 
 ---
 
 ## Prismax User Management Business Logic (app_prismax_user_management) – English Version
 
 This document summarizes the core business logic of Prismax user management (user_management) based on `app_prismax_user_management/app.py` and related helper modules, for requirements, testing, and debugging reference.
+
+> Last updated: 2026-05-15
 
 ---
 
@@ -506,23 +694,26 @@ This document summarizes the core business logic of Prismax user management (use
     - `Explorer Member`: default free user.
     - `Amplifier Member`: upgraded via a $99 payment.
     - `Innovator Member`: further upgraded via a $399 payment.
+  - A new **`users.user_role`** field identifies functional roles (independent of membership tier):
+    - `operator`: a robot operator who has been approved to register robots and upload data.
+    - `qa` / `senior qa` / `expert qa`: QA reviewers assigned by administrators.
   - Some **advanced features** are only available to specific tiers, for example:
     - **TeleOp robot remote control** (from PRIS-130, rules keyed by backend `robot_status.robot_class`; names and slugs from `robot_name` / `robot_slug`):
       - Explorer: completely blocked from using all TeleOp robots (joining any robot queue returns 403).
       - Amplifier:
-        - **`robot_class == 'training'`** (e.g. former arm1/arm4): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error message including that robot’s `robot_name`.
-        - **`robot_class == 'open'`** (e.g. former arm3): at most **3 lifetime uses** for that robot; error message starts with “Amplifier members have reached the 3 total uses limit for” and includes `robot_name`; frontend shows upgrade modal based on this prefix.
+        - **`robot_class == 'training'`** (e.g. former arm1/arm4): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error message including that robot's `robot_name`.
+        - **`robot_class == 'open'`** (e.g. former arm3): at most **3 lifetime uses** for that robot; error message starts with "Amplifier members have reached the 3 total uses limit for" and includes `robot_name`; frontend shows upgrade modal based on this prefix.
         - **`robot_class == 'access'`** (e.g. former arm2): requires invite code and Monad wallet/purchase check; **no additional per-tier usage cap**, only generic queue / Fast Track rules.
         - Amplifier users **cannot** reserve robots.
       - Innovator: has access to all TeleOp features, including Fast Track queue-jumping and all three arms, and enjoys higher point multipliers.
     - **Robot reservation `/api/reserve-robot`**:
       - Only available to Innovator Members, used to book in-person demos or remote TeleOp experiences (requires `user_id + token` verification).
     - **Fast Track (TeleOp queue jump)**:
-      - Only Innovators can use Fast Track, with a shared limit of 6 Fast Track uses per UTC day across all robots; message when limit reached: e.g. “maximum 6 fast tracks a day”.
+      - Only Innovators can use Fast Track, with a shared limit of 6 Fast Track uses per UTC day across all robots; message when limit reached: e.g. "maximum 6 fast tracks a day".
 
 - **Dual-channel account system: multi-chain wallets + email**
   - Users can enter the system either via **email** or via **wallet address**.
-  - `linked_email` and `linked_wallet_address` bind the “email account” and “wallet account” so they are treated as the same user identity.
+  - `linked_email` and `linked_wallet_address` bind the "email account" and "wallet account" so they are treated as the same user identity.
 
 - **Deep coupling between points and entitlements**
   - Points accumulation methods: first-login bonus, daily login, quizzes, comment rewards, referral revenue share, etc., all managed via `point_transactions` + `users.total_points`.
@@ -530,11 +721,18 @@ This document summarizes the core business logic of Prismax user management (use
 
 - **Payment and membership-upgrade closed loop**
   - Stripe payments (credit card) and multi-chain crypto payments (Solana/EVM/Base/Monad/Aptos) are all recorded in `purchase_records`.
-  - When payment amounts meet certain thresholds, the user’s membership tier is automatically upgraded from `Explorer → Amplifier → Innovator`.
+  - When payment amounts meet certain thresholds, the user's membership tier is automatically upgraded from `Explorer → Amplifier → Innovator`.
 
 - **External service bindings**
-  - Twitter OAuth: bound into `user_profile_twitter_id` and `user_profile_twitter_name` on the user record.
+  - Twitter OAuth: bound into `user_profile_twitter_id` and `user_profile_twitter_name` on the user record; unlinking supported.
+  - **Discord OAuth (new)**: bound into `user_profile_discord_id` and `user_profile_discord_name`; unlinking supported.
   - YouTube is used only for monitoring/alerting; it does not directly affect user identity but is related to `robot_status` and admin notifications.
+
+- **Beta access control (new)**
+  - During beta, access is gated by a one-time access code (`BETA_ACCESS_CODE`); upon successful verification a 24-hour JWT Beta Token is issued.
+
+- **Operator system (new)**
+  - Regular users can register their own robots, submit an Operator membership application, and upon admin approval receive the `operator` role, enabling them to upload robot operation data to the VLA Foundry and view statistics in the Operator Dashboard.
 
 ---
 
@@ -548,7 +746,7 @@ This document summarizes the core business logic of Prismax user management (use
 - `userid`: primary key, auto-increment.
 - `email`: login email (nullable, used for the email-based account system).
 - `login_type`: login method; `'0'` means email verification-code login, other values are used for Google/Apple, etc.
-- `hash_code`: current login token, equivalent to a “session/long-term login token”, refreshed on each successful login or logout.
+- `hash_code`: current login token, equivalent to a "session/long-term login token", refreshed on each successful login or logout.
 
 **Wallet and on-chain addresses (multi-chain)**
 - `solana_receive_address`
@@ -565,9 +763,12 @@ This document summarizes the core business logic of Prismax user management (use
 - `user_class`: membership tier (`Explorer Member` / `Amplifier Member` / `Innovator Member`).
 - `total_points`: current total available points.
 - `referral_code`: the referral code this user shares externally.
-- `referrers_referral_code`: the referral code of the referrer that this user entered when registering (i.e., “who invited me”).
+- `referrers_referral_code`: the referral code of the referrer that this user entered when registering (i.e., "who invited me").
 - `referred_reward_point`: settled points from the 10% revenue share, used to avoid double-counting.
 - `referral_initial_reward`: accumulated total of initial invite rewards (500 points per invitee) that have been issued.
+
+**Role system (new)**
+- `user_role`: functional role — `operator` (approved data producer), `qa` / `senior qa` / `expert qa` (QA reviewers). Independent of `user_class`; written by admin grant or an approval workflow.
 
 **Profile / contact information**
 - `user_name`: nickname.
@@ -578,6 +779,8 @@ This document summarizes the core business logic of Prismax user management (use
 **External account bindings**
 - `user_profile_twitter_id`
 - `user_profile_twitter_name`
+- `user_profile_discord_id` (new)
+- `user_profile_discord_name` (new)
 
 **Others**
 - `created_at`: creation timestamp, used to determine first login, abnormal behavior, etc.
@@ -602,9 +805,9 @@ Usage:
 - `transaction_type`: transaction type:
   - `daily_login`: daily login reward.
   - `quiz`: quiz reward.
-  - `comment_reward`: comment reward.
+  - `comment_reward`: comment reward (temporarily disabled per PRIS-125).
   - other types may be added.
-- `user_local_date`: user’s local date (used to deduplicate daily login).
+- `user_local_date`: user's local date (used to deduplicate daily login).
 - `created_at_utc`: UTC timestamp.
 
 ### 4. `purchase_records`
@@ -635,6 +838,17 @@ Usage:
 - `detected_bot_users`: records detected bot/abuse users.
 - `verify_payment_records`: reconciliation snapshots for multi-chain/Stripe.
 
+### 6. Operator-related tables (new)
+
+- `data_machines`: robots registered by operators — `machine_id`, `manufacture`, `product_name`, `serial_number`, `user_id`, `is_default_producer`.
+- `data_sample_machines`: platform-maintained catalog of supported robot models (managed via VLA Admin APIs); operators select from this catalog when registering.
+- `data_operator_applications`: operator membership applications — `user_id`, `email`, `admin_review_status` (`pending` / `approved` / `denied`), `created_at`, `admin_reviewed_at`.
+- `data_uploads`: data uploads submitted by operators, with `machine_id`, `user_id`, etc.
+- `data_episodes`: individual episodes within an upload — `upload_id`, `status`, `video_duration_hours`.
+- `data_tasks`: VLA task configuration, managed by admins via VLA Admin APIs.
+- `data_qa_sessions`: QA review session records — `user_id`, `qa_score`; used to track reviewer workload and scoring.
+- `admin_invite_codes`: admin-issued single-use invite codes for onboarding users.
+
 ---
 
 ## 3. Authentication and Login Flows
@@ -643,7 +857,7 @@ Usage:
 
 **Main steps:**
 1. Input: `email`, together with `recaptchaToken` (v3) and `recaptchaV2Token` (v2).
-2. Run “emergency email mode interception”: obvious bot-like Hotmail addresses matching certain patterns are short-circuited as “fake send” (no real email is sent).
+2. Run "emergency email mode interception": obvious bot-like Hotmail addresses matching certain patterns are short-circuited as "fake send" (no real email is sent).
 3. Enforce a 30-second cooldown per email address to prevent frequent requests.
 4. Use both reCAPTCHA v3 and v2 checks:
    - v3 `score` must be greater than 0.3.
@@ -659,7 +873,7 @@ Usage:
    - whether the record exists,
    - whether `code` matches,
    - whether it is expired.
-3. Once validated, insert a `users` row with this `email` (ignore if it already exists), as an initial “email-side user” record.
+3. Once validated, insert a `users` row with this `email` (ignore if it already exists), as an initial "email-side user" record.
 
 ### 3. Core Login Save `/auth/save`
 
@@ -702,6 +916,19 @@ Used to finalize authentication and persist login state into `users`:
   - Generate a JWT `access_token` (30 minutes) and `refresh_token`, with `role` claim set to `admin`.
   - Some backend admin APIs use `@jwt_required()` + `get_jwt_identity()` for authorization.
 
+### 6. Beta Access Control (new)
+
+- **Verify beta access code** `/auth/beta/verify-access-code`
+  - Input: `access_code`.
+  - Rate-limited: max 10 calls per minute (brute-force protection).
+  - Uses `hmac.compare_digest` for constant-time comparison to prevent timing attacks.
+  - On success, issues a 24-hour JWT Beta Token (`typ: "beta"`).
+  - On failure, logs the request IP.
+
+- **Validate beta token** `/auth/beta/validate-token`
+  - Input: `beta_token`.
+  - Validates JWT signature and expiry; returns `success: true` or a specific failure reason (expired / invalid).
+
 ---
 
 ## 4. User Query and Email/Wallet Binding
@@ -730,18 +957,18 @@ Used to finalize authentication and persist login state into `users`:
 5. When both `email` and `wallet_address` are provided:
    - If both are found:
      - If the wallet user is already a high-tier member (`Amplifier` or `Innovator`), prevent it from being bound to another email account to avoid abuse.
-     - Perform “unbind then rebind” of historical relationships, ensuring:
-       - The current email’s `linked_wallet_address` points to this wallet.
-       - The current wallet record’s `linked_email` points to this email.
-   - After binding is finalized, return the email-side user’s full information as the primary identity.
+     - Perform "unbind then rebind" of historical relationships, ensuring:
+       - The current email's `linked_wallet_address` points to this wallet.
+       - The current wallet record's `linked_email` points to this email.
+   - After binding is finalized, return the email-side user's full information as the primary identity.
 6. If neither email nor wallet ultimately resolves to a user, return 404.
 
 ### 2. Unbind Email and Wallet `/api/disconnect-wallet-from-email`
 
 - Input: `email`, `wallet_address`, `chain`, `token`.
 - Find the email user via `email + hash_code`, and the wallet user via the chain-specific address column.
-- If the email record’s `linked_wallet_address` points to that wallet, set it to `NULL`.
-- If the wallet record’s `linked_email` points to that email, set it to `NULL`.
+- If the email record's `linked_wallet_address` points to that wallet, set it to `NULL`.
+- If the wallet record's `linked_email` points to that email, set it to `NULL`.
 - If neither side has a valid binding, return 404.
 
 ---
@@ -754,13 +981,13 @@ Used to finalize authentication and persist login state into `users`:
 - **Unified identity verification:**
   - Email users: must provide `email + token(hash_code)`; the backend matches `users` by `email + hash_code`.
   - Wallet users: must provide `wallet_address + chain + token(hash_code)`; the backend matches via the chain column + `hash_code`.
-  - All edit-type APIs return 401/403 if no matching user is found or the token is invalid, preventing unauthorized edits to other users’ data.
+  - All edit-type APIs return 401/403 if no matching user is found or the token is invalid, preventing unauthorized edits to other users' data.
 - **Field update strategy:**
-  - Only “whitelisted fields” (nickname, social accounts, phone number, public email, etc.) can be updated; sensitive fields such as `user_class`, points, and referral codes cannot be modified here.
+  - Only "whitelisted fields" (nickname, social accounts, phone number, public email, etc.) can be updated; sensitive fields such as `user_class`, points, and referral codes cannot be modified here.
   - Uses **dynamic SQL**: only generates `SET` clauses for fields actually present in the request to avoid inadvertently setting fields to `NULL`.
 - **Security and auditing:**
   - Updating the public email requires an additional email verification-code check (see the next subsection).
-  - Twitter and other third-party bindings are written via OAuth callbacks to avoid the user directly submitting third-party IDs.
+  - Twitter, Discord, and other third-party bindings are written via OAuth callbacks to avoid the user directly submitting third-party IDs.
 
 ### 1. Update Basic Profile `/api/update-user-info`
 
@@ -784,7 +1011,7 @@ Flow:
    - Revalidate login state using `userid + hash_code`.
    - Update `users.user_profile_email` to the new email.
 
-### 3. Twitter OAuth Binding
+### 3. Twitter OAuth Binding and Unlinking
 
 **Initiate binding `/auth/twitter/initiate`:**
 - Input: `email` or `wallet_address + chain`, and `token`.
@@ -800,6 +1027,28 @@ Flow:
   - verify that the token hash in state matches the current `hash_code` in the database, preventing issues if the user logged out or the token was hijacked in the meantime.
 - Use the authorization code to obtain a Twitter access token and call Twitter APIs to get `id` and `username`.
 - Write `user_profile_twitter_id` and `user_profile_twitter_name` into the corresponding `users` record.
+
+**Unlink `/api/user-profile/twitter-unlink` (new):**
+- Input: `email` or `wallet_address + chain`, and `token`.
+- Locate user via identity verification, then set `user_profile_twitter_id` and `user_profile_twitter_name` to `NULL`.
+- Returns success even if no Twitter account was linked (idempotent).
+
+### 4. Discord OAuth Binding and Unlinking (new)
+
+**Initiate binding `/auth/discord/initiate`:**
+- Input: `email` or `wallet_address + chain`, `token`, `return_url`, `backend_host_url`.
+- Locate `userid` via identity verification, then use the `discord_oauth` module to construct a **stateful Discord authorization URL**, encoding `user_id`, token hash, and return URL in the state.
+
+**Callback `/auth/discord/callback`:**
+- Parse and validate the state (signature + expiry + token hash to prevent session hijacking).
+- Exchange authorization code for a Discord access token, then fetch `id` and `username`.
+- Write `user_profile_discord_id` and `user_profile_discord_name` into the corresponding `users` record.
+- Redirect to the frontend with `discord_status=success/error` query params.
+
+**Unlink `/api/user-profile/discord-unlink`:**
+- Input: `email` or `wallet_address + chain`, and `token`.
+- Locate user via identity verification, then set `user_profile_discord_id` and `user_profile_discord_name` to `NULL`.
+- Returns success even if no Discord account was linked (idempotent).
 
 ---
 
@@ -830,7 +1079,7 @@ Flow:
 1. Input: `wallet_address`, `amount_total` (integer, in USD), `user_id`, `transaction_hash`, `currency`, `chain`.
 2. Validate that `chain` is allowed.
 3. If `transaction_hash` is provided:
-   - First check whether this hash already exists in any chain’s transaction-hash column to prevent duplicate entries.
+   - First check whether this hash already exists in any chain's transaction-hash column to prevent duplicate entries.
    - Call the appropriate `verify_*_payment` function per chain to validate the on-chain transfer:
      - The recipient address must be the official Prismax address.
      - Amount must be within the allowed tolerance for $99 or $399.
@@ -857,14 +1106,14 @@ Flow:
        - Other regular members: 30 points.
        - `Innovator Member`: 50 points (Innovator is explicitly boosted in code).
        - Then multiply by `multiplier` (double on Monad).
-     - If yes, do not issue additional points; just return “already claimed”.
+     - If yes, do not issue additional points; just return "already claimed".
   3. Write a record into `point_transactions` and update `users.total_points`.
 
 ### 2. Query Points History `/api/get-point-transactions`
 
 - Can be called with `wallet_address + chain` or `email`, or with no parameters:
-  - With parameters: returns the user’s last 14 days of point transactions plus current `total_points`.
-  - Without parameters: returns all users’ point transactions for the last 14 days (for backend viewing).
+  - With parameters: returns the user's last 14 days of point transactions plus current `total_points`.
+  - Without parameters: returns all users' point transactions for the last 14 days (for backend viewing).
 
 ### 3. Referral Relationships and Rewards `/api/get-users-by-referral`
 
@@ -872,9 +1121,9 @@ Flow:
 - A user, as a referrer, wants to see the users they have referred and the rewards they have earned (fixed invite rewards + 10% revenue share).
 
 **Settlement rules:**
-1. Input: `referrers_referral_code` (the current user’s referral code), `userid` (current user), `token`.
+1. Input: `referrers_referral_code` (the current user's referral code), `userid` (current user), `token`.
 2. Use `userid + hash_code` to lock and lock the row, preventing concurrent multiple settlements.
-3. Validate that `referrers_referral_code` equals the user’s own `users.referral_code` value.
+3. Validate that `referrers_referral_code` equals the user's own `users.referral_code` value.
 4. Query all users with `users.referrers_referral_code = referral_code` and sum their `total_points`.
 5. **Invite rewards:**
    - Each referred user yields a fixed 500 points.
@@ -901,7 +1150,7 @@ Flow:
 ### 5. ~~Comment Reward `POST /api/check-comment-reward`~~ (temporarily disabled per PRIS-125)
 
 - ~~Rate limiting: each `user_id` can call this API at most 5 times per minute.~~
-- Validate that the comment is “meaningful”:
+- Validate that the comment is "meaningful":
   - at least 10 characters and at least 3 words.
 - ~~Each user can only receive one comment reward per day:~~
   - ~~ensured by checking for existing `transaction_type = 'comment_reward'` records for that day.~~
@@ -929,7 +1178,7 @@ Flow:
   - Frontend route is **`/tele-op/:robotSlug`** (no longer `/tele-op/:robotId`); names and types come from the API to support new or reconfigured robots.
   - **`robot_class`** values:
     - **`training`** (e.g. former arm1/arm4): Amplifier daily 3-join cap.
-    - **`open`** (e.g. former arm3): Amplifier 3 lifetime uses; frontend shows upgrade modal when error message starts with “Amplifier members have reached the 3 total uses limit for”.
+    - **`open`** (e.g. former arm3): Amplifier 3 lifetime uses; frontend shows upgrade modal when error message starts with "Amplifier members have reached the 3 total uses limit for".
     - **`access`** (e.g. former arm2): invite-only, Monad check required; no extra usage cap.
 
 - **Explorer Member**
@@ -937,38 +1186,163 @@ Flow:
   - Explorers will not generate new TeleOp control records in `tele_op_control_history`.
 
 - **Amplifier Member**
-  - **`robot_class == 'training'`** (e.g. Training Arm): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error including that robot’s `robot_name`.
-  - **`robot_class == 'open'`** (e.g. Buddy Arm): **3 lifetime uses** for that robot; 4th join returns 403 with message starting “Amplifier members have reached the 3 total uses limit for” + `robot_name`; frontend uses this to show upgrade modal. Count from `tele_op_control_history` for that `robot_id`.
+  - **`robot_class == 'training'`** (e.g. Training Arm): at most **3 successful queue joins per UTC day**; 4th and later return 403 with error including that robot's `robot_name`.
+  - **`robot_class == 'open'`** (e.g. Buddy Arm): **3 lifetime uses** for that robot; 4th join returns 403 with message starting "Amplifier members have reached the 3 total uses limit for" + `robot_name`; frontend uses this to show upgrade modal. Count from `tele_op_control_history` for that `robot_id`.
   - **`robot_class == 'access'`** (e.g. Monad Arm): **no additional member-specific limit**; only general queue/mutual-exclusion, invite code, and Fast Track rules (see TeleOp service docs). Amplifiers can join and control normally.
 
 - **Innovator Member**
   - Can use **all robots**, unaffected by Explorer global prohibition.
-  - Fast Track: **6 Fast Track uses per UTC day across all robots**; 7th and later still allow join but are not Fast Track, with message e.g. “You have reached the maximum 6 fast tracks a day. Please come back tomorrow.”.
+  - Fast Track: **6 Fast Track uses per UTC day across all robots**; 7th and later still allow join but are not Fast Track, with message e.g. "You have reached the maximum 6 fast tracks a day. Please come back tomorrow.".
   - These 6 uses are **shared** across all robots, enforced via `tele_op_control_history` and queue logic.
 
 - **Global queue mutual exclusion (applies to all tiers)**
-  - If a user is in `waiting/active` in any robot queue, joining another robot’s queue is rejected with 403.
+  - If a user is in `waiting/active` in any robot queue, joining another robot's queue is rejected with 403.
   - This rule applies to all `robot_id`s, preventing a single account from occupying multiple robots at once.
 
-### 3. User Stats `/api/user-stats`
+### 3. User Stats
 
-- Requires JWT admin permissions.
-- Returns:
-  - the number of users per membership tier (Innovator/Amplifier/Explorer);
-  - the unique count of `user_id` values with records in `tele_op_control_history` (active remote-control users).
+- **`/api/user-stats`**: requires JWT admin permissions; returns user count per membership tier and the count of unique active TeleOp users.
+- **`/api/user-stats-v2` (new)**: requires JWT admin permissions; returns richer cross-tabulated statistics:
+  - User counts by membership tier × connection type (solana/base/monad/aptos/ethereum/email), with row and column totals.
+  - TeleOp session count, total hours, and unique user count per connection type.
 
 ### 4. Admin-Side Related (Brief)
 
 - CRUD APIs for `admin_whitelist`: used to configure wallet addresses allowed to operate from the backend.
 - `detect_and_reset_bots()`:
   - detects point transactions with dates in the future or before the project launch, identifies suspected bot accounts, records them into `detected_bot_users`, and prepares for subsequent point resets.
+- **Admin invite codes (new)**:
+  - `/api/create-admin-invite-code`: admin creates a single-use invite code (JWT required).
+  - `/api/get-admin-invite-codes`: admin lists all invite codes and their usage status.
+  - `/api/use-admin-invite-code`: user claims an invite code to bind it to their account (one-time use; 409 if already used).
+  - `/api/check-admin-invite-binding`: user checks whether an invite code is already bound to their account.
 
 ---
 
-## 9. Summary: Key Takeaways of Prismax User Management
+## 9. Operator System (new)
+
+The Operator system allows users who own physical robots to apply to become platform data producers (Operators), upload robot operation data to the VLA Foundry, and view statistics and QA scores in the Operator Dashboard.
+
+### 1. Robot Registration
+
+- **Get registration options `/api/operator/get-robot-registration-options`**
+  - Input: `user_id`, `token` (Bearer).
+  - Returns the list of supported robot manufacturers and models from `data_sample_machines`.
+
+- **Validate serial number `/api/operator/register-robot/validate-serial-number`**
+  - Input: `user_id`, `token`, `manufacturer`, `model`, `serial_number`.
+  - Validates the serial number format per manufacturer rules:
+    - Airbot: 16 chars, starts with `PZ`, ends with 9 digits.
+    - Agilex Robotics: 23 chars, starts with `MD`.
+    - I2rt Robotics: 11 chars, starts with `JG`.
+    - RealMan: 16 chars, starts with `RM`.
+  - Returns `valid: null` for unknown manufacturers, `valid: false` for invalid format, `valid: true` for valid.
+
+- **Register robot `/api/operator/register-robot`**
+  - Input: `user_id`, `token`, `robot_data` (`manufacturer`, `model`, `serial_number`).
+  - Validates `manufacturer + model` against `data_sample_machines`.
+  - Prevents duplicate registrations for the same `manufacturer + model + serial_number` per user (409).
+  - First registered robot is automatically set as the default data producer (`is_default_producer = true`).
+  - Inserts into `data_machines`.
+
+- **Unregister robot `/api/operator/unregister-robot`**
+  - Input: `user_id`, `token`, `machine_id`.
+  - Safeguards:
+    1. If deleting the default producer and more than 1 other robot exists, requires the user to first manually switch the default; if only 1 other robot exists, auto-promotes it.
+    2. If the robot has upload history in `data_uploads`, deletion is blocked (409).
+  - If no robots remain after deletion, clears `users.user_role = 'operator'` and removes pending/approved `data_operator_applications`.
+
+- **Set default data producer `/api/operator/set-default-producer`**
+  - Input: `user_id`, `token`, `machine_id`.
+  - Not allowed when only one robot is registered.
+  - Sets all other machines to `is_default_producer = false`, then sets the target to `true`.
+
+### 2. Operator Membership Application
+
+- **Get operator user data `/api/operator/get-user-data`**
+  - Input: `user_id`, `token` (Bearer).
+  - Returns the list of registered robots and `operator_status`:
+    - `approved` if `user_role == 'operator'`.
+    - Otherwise, returns `pending` / `denied` / `null` from the latest `data_operator_applications` record.
+
+- **Submit membership application `/api/operator/submit-membership-application`**
+  - Input: `user_id`, `email`, `token`.
+  - Validates:
+    - The `email` must match one of the account's associated emails (`email`, `user_profile_email`, `linked_email`).
+    - The user must have at least one registered robot.
+    - No existing `pending` application is allowed (returns 400 on duplicate).
+  - Inserts a `pending` record into `data_operator_applications`.
+  - Notifies system admin emails with the current pending application count.
+
+### 3. Admin: Operator Application Review
+
+- **List applications `/api/admin/get-operator-applications`** (JWT required)
+  - Filterable by `status` (`pending` / `approved` / `denied`), paginated.
+  - Each application includes user membership tier, points, wallet address, and registered robots list.
+
+- **Review application `/api/admin/review-operator-application`** (JWT required)
+  - Input: `application_id`, `user_id`, `approved` (boolean).
+  - Approve: sets `users.user_role = 'operator'`, updates application status to `approved`, sends approval email.
+  - Deny: clears `users.user_role`, updates status to `denied`.
+
+### 4. Operator Dashboard
+
+- **Summary `/vla/operator-dashboard/summary`** (Operator self-serve)
+  - Input: `token` (Bearer), `duration` (`7d` / `30d` / `90d` / `1y` / `all`, default `30d`).
+  - Returns for the current Operator over the specified window:
+    - Average QA score (with delta vs. prior period).
+    - Total episode count (with % change vs. prior period).
+    - Average upload hours per day.
+    - QA score trend (grouped by period).
+    - Episode hours trend.
+
+- **Uploads `/vla/operator-dashboard/uploads`** (Operator self-serve)
+  - Input: `token`, `duration`, optional `machine_id` filter, `page`, `page_size` (max 50).
+  - Returns paginated upload list for the current Operator.
+
+- **Admin views `/vla/admin/operator-dashboard/summary`** and **`/vla/admin/operator-dashboard/uploads`** (JWT required)
+  - Additional `user_id` parameter to view any Operator's statistics and uploads.
+
+---
+
+## 10. VLA Admin Management APIs (new)
+
+VLA Admin APIs allow internal administrators to manage VLA configuration data via JWT authentication.
+
+### 1. Sample Machine Model Management `/api/vla-admin/sample-machines`
+
+- **GET**: Returns all rows of `data_sample_machines` plus column metadata (types, `column_details`).
+- **POST** (Upsert): Insert or update a sample machine record by `machine_id`; dynamically validates column types and constraints; returns the result row and metadata.
+
+### 2. Task Management `/api/vla-admin/tasks`
+
+- **GET**: Returns all tasks in `data_tasks` plus column metadata.
+- **POST** (Create): Creates a new task; supports auto-generated integer `task_id`; supports `preview_video_upload_id` resolution via `preview_video_helper`.
+- **PATCH `/api/vla-admin/tasks/<task_id>`**: Updates specified fields of a task (dynamic SET clause, unknown fields are ignored).
+
+---
+
+## 11. QA Reviewer Management (new)
+
+Admin APIs for managing QA reviewer roles (all require JWT authentication). QA reviewer roles are tracked in `users.user_role`.
+
+- **List QA reviewers `/api/admin/get-qa-reviewers`**
+  - Paginated list of all users with `user_role IN ('qa', 'senior qa', 'expert qa')`.
+  - Each entry includes: `user_id`, email, wallet address, role, `review_count` (from `data_qa_sessions`), `average_score`.
+  - Sorted: `expert qa > senior qa > qa`, then by review count descending.
+
+- **Set/remove QA role `/api/admin/set-qa-reviewer-role`**
+  - Supports lookup by `user_id`, email, or wallet address (`solana`/`ethereum`/`base`/`monad`).
+  - Pass one of `qa` / `senior qa` / `expert qa` to assign a role; pass empty string or `null` to remove the role.
+
+---
+
+## 12. Summary: Key Takeaways of Prismax User Management
 
 - **Unified session model**: all login methods converge on the `users` table and `hash_code` token.
 - **Unified identity across multiple entry points**: via `linked_email` and `linked_wallet_address`, email and multi-chain wallets form a unified account view.
+- **Two-dimensional role system**: `user_class` (membership tier, payment-driven) and `user_role` (functional role, approval-driven) are independent and together govern user permissions.
 - **Membership-tier-driven business**: membership tier affects point multipliers, robot reservation eligibility, and other key entitlements, and is tightly coupled with the payment closed loop.
 - **Rich yet anti-abuse points system**: multiple behaviors drive point growth, while reCAPTCHA, email pattern blacklists, and time-window checks help mitigate bot abuse.
 - **Complete payment and reconciliation mechanisms**: Stripe and multi-chain payments have dedicated tables and reconciliation snapshots to support finance and risk analysis.
+- **Operator data ecosystem**: the Operator system forms a complete loop — register robot → apply for operator status → upload data → QA review → Dashboard statistics — supporting VLA model training data collection.
