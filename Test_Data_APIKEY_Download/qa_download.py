@@ -3,9 +3,9 @@ import time
 
 import requests
 
-api_key = "pxa_9qGw9xrTz_mD4h5KuDH35ujPLozkQp_REpcihzw4xTw"
-package_id = "pkg_5jp2OIxaMNK5PIhWywsElBGi"
-output_dir = "./qadataset1"
+api_key = "pxa_04L5OcI9vAv1OBDITHqxhhjZOQ1vWEGRFyN7b_7drXA"
+package_id = "pkg_-FZKwVhjRILRYN2MoKnF_a9c"
+output_dir = "./paranelldownload"
 
 CREATE_SESSION_URL = "https://data.prismaxserver.com/v1/data/download-sessions"
 
