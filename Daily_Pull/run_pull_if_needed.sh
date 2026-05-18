@@ -10,12 +10,8 @@ STAMP_FILE="$SCRIPT_DIR/.last_pull_date"
 LOG_DIR="$SCRIPT_DIR/log"
 CATCHUP_LOG="$LOG_DIR/catchup.log"
 
-# Load environment (for LaunchAgent: no shell profile by default)
-if [ -f ~/.zshrc ]; then
-    source ~/.zshrc 2>/dev/null || true
-fi
-
-# Load Prismax env file(s) if present
+# Load Prismax env file(s) explicitly. Avoid ~/.zshrc because zsh-specific
+# startup files can terminate a bash script before the pull runs.
 ENV_FILE="$SCRIPT_DIR/daily_pull_env.sh"
 ENV_LOCAL="$SCRIPT_DIR/daily_pull_env.local.sh"
 if [ -f "$ENV_FILE" ]; then

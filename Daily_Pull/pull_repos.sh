@@ -11,29 +11,32 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PRISMAX_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LAST_PULL_DATE_FILE="$SCRIPT_DIR/.last_pull_date"
+LOCK_DIR="$SCRIPT_DIR/.pull_repos.lock"
 
 # Where to write "email sent at" stamp for Regression gating
 SENT_AT_FILE="$PRISMAX_ROOT/QA_PrismaX/Daily_Regression_Test/tele_op_services/.daily_pull_sent_at"
 
 TODAY="$(date '+%Y-%m-%d')"
-# Idempotency: if already ran today, exit (avoid double emails from multiple schedulers)
+# Idempotency: if already completed today, exit (avoid double emails from multiple schedulers)
 if [ -f "$LAST_PULL_DATE_FILE" ]; then
     LAST="$(cat "$LAST_PULL_DATE_FILE" 2>/dev/null || true)"
     if [ -n "$LAST" ] && [ "$LAST" = "$TODAY" ] && [ "${FORCE_RUN:-}" != "1" ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Skip: already ran today ($TODAY)."
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Skip: already completed today ($TODAY)."
         exit 0
     fi
 fi
 
-# Record that we are running today (for login/wake catch-up: avoid double run same day)
-echo "$TODAY" > "$LAST_PULL_DATE_FILE"
-
-# Load environment variables (LaunchAgent/cron environment)
-if [ -f ~/.zshrc ]; then
-    source ~/.zshrc 2>/dev/null || true
+# Prevent concurrent daily/catch-up runs without marking the day complete before email succeeds.
+if [ "${FORCE_RUN:-}" != "1" ]; then
+    if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Skip: another pull_repos.sh is already running."
+        exit 0
+    fi
+    trap 'rm -rf "$LOCK_DIR"' EXIT
 fi
 
-# Load Prismax env file(s) if present (keeps local SMTP config)
+# Load Prismax env file(s) explicitly. Do not source ~/.zshrc here: zsh-specific
+# startup files may exit/return when sourced by bash, aborting this script.
 ENV_FILE="$SCRIPT_DIR/daily_pull_env.sh"
 ENV_LOCAL="$SCRIPT_DIR/daily_pull_env.local.sh"
 if [ -f "$ENV_FILE" ]; then
@@ -292,6 +295,7 @@ EOF
 EMAIL_EXIT_CODE=$?
 if [ $EMAIL_EXIT_CODE -eq 0 ]; then
     log_message "Email notification sent successfully"
+    echo "$TODAY" > "$LAST_PULL_DATE_FILE"
     mkdir -p "$(dirname "$SENT_AT_FILE")" 2>/dev/null || true
     echo "$NOW_STR" > "$SENT_AT_FILE"
     log_message "Wrote daily pull sent_at: $SENT_AT_FILE"
