@@ -20,8 +20,8 @@
 
 ```bash
 prismax-cli login
-prismax-cli download pkg_xxx --root dataset/
-prismax-cli convert --root dataset/task_name --out lerobot_out --clean
+prismax-cli download pkg_xxx --root 10_Assemble_and_mix_salad/
+prismax-cli convert --root 10_Assemble_and_mix_salad/task_name --out lerobot_out --clean
 prismax-cli visualize --root lerobot_out --episode 0 --robot piperx
 prismax-viewer /path/to/lerobot_out
 ```
@@ -204,3 +204,12 @@ sudo apt install ffmpeg libegl1 libgl1
 4. **并发下载中断恢复**：`SIGINT` 安全退出、`.part` 文件清理的自动化测试缺失
 5. **Viewer GUI 交互**：冒烟测试仅覆盖加载和播放，拖动进度条、切换 episode、SSH 断线重连等交互路径未自动化
 6. **LeRobot 数据集格式合规性**：转换输出是否完全符合 LeRobot v2.1 schema 规范，缺少 schema 级别的合规校验测试
+
+The following areas currently have **weak or missing test coverage** and are recommended as key QA focus areas:
+
+1. **End-to-end download → convert pipeline**: Existing tests validate individual modules separately, but the complete conversion workflow using real MCAP files still relies on manual smoke testing.
+2. **NVENC hardware encoding path**: CI environments without GPUs cannot automatically cover this path; dedicated validation on machines with NVIDIA GPUs is required.
+3. **macOS / Windows compatibility**: Currently no coverage at all. It should be clarified whether support for these platforms is part of the roadmap.
+4. **Concurrent download interruption recovery**: Automated tests are missing for SIGINT-safe shutdown behavior and cleanup of .part files.
+5. **Viewer GUI interactions**: Current smoke tests only cover loading and playback. Interaction flows such as timeline seeking, episode switching, and SSH disconnect/reconnect are not automated.
+6. **LeRobot dataset format compliance**: There is no schema-level validation to ensure converted outputs fully comply with the LeRobot v2.1 schema specification.

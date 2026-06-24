@@ -316,14 +316,14 @@ source .venv/bin/activate
 python prismax/tests/smoke_viewer.py /path/to/lerobot_sample
 
 # SSH 远程 Viewer 冒烟测试
-python prismax/tests/smoke_remote_viewer.py user@host /remote/dataset
+python prismax/tests/smoke_remote_viewer.py user@host /remote/10_Assemble_and_mix_salad
 
 # CLI 命令（venv 激活后 prismax-cli 可直接使用，或用 python -m 方式）
-prismax-cli download pkg_xxx --root ./dataset
-prismax-cli convert --root ./dataset/task --out ./lerobot_out --clean
+prismax-cli download pkg_xxx --root ./10_Assemble_and_mix_salad
+prismax-cli convert --root ./10_Assemble_and_mix_salad/task --out ./lerobot_out --clean
 prismax-cli visualize --root ./lerobot_out --episode 0 --robot piperx
 # 等价的 python -m 写法（更安全，不依赖激活状态）
-python -m prismax.cli download pkg_xxx --root ./dataset
+python -m prismax.cli download pkg_xxx --root ./10_Assemble_and_mix_salad
 ```
 
 ---
