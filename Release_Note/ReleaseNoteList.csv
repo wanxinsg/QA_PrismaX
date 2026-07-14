@@ -1,0 +1,38 @@
+Sprint12,,,
+Issue Type,Key,Summary,Sprint
+Task,PRIS-83,distribute marketing promotional emails to all users with an email address with us,PRIS Sprint 12
+Bug,PRIS-73,Some Improvements for Mini APP on BASE,PRIS Sprint 12
+Task,PRIS-55,Get request use cloud flare to cache,PRIS Sprint 12
+Bug,PRIS-40,Prismax admin portal cannot use phantom wallet to login.,PRIS Sprint 12
+Task,PRIS-56,make metamask wallet available over Solana network as well,PRIS Sprint 12
+Bug,PRIS-78,prismax total_points calculation logic,PRIS Sprint 12
+Task,PRIS-82,Admin Portol:Break down No. of members by chains and email,PRIS Sprint 12
+Task,PRIS-93,Change the flow to redirect users to Innovator membership when they click to control the Buddy Arm,PRIS Sprint 12
+Bug,PRIS-90,Sometimes it took a long time to start youtube streaming when user gets turns to start teleops,PRIS Sprint 12
+Bug,PRIS-91,Investigate the root cause for the duplicated queue position in production env.,PRIS Sprint 12
+Task,PRIS-95,Write instructions to restart the arm,PRIS Sprint 12
+Task,PRIS-96,"stop the leaderboard update for Monad on Dec 25th, 24:00",PRIS Sprint 12
+Bug,PRIS-97,payment and membership mismatch,PRIS Sprint 12
+Task,PRIS-98,add monad chain to the payment records verification table over Admin portal,PRIS Sprint 12
+Task,PRIS-102,Review API security: API list check - authorization,PRIS Sprint 12
+Bug,PRIS-71,"for Monad Chain, Metamask wallet cannot be connected correctly.",PRIS Sprint 12
+Task,PRIS-104,write summary for marketing team of sprint release features change description,PRIS Sprint 12
+Task,PRIS-105,Training Arm movement limitation needs to be adjust,PRIS Sprint 12
+Bug,PRIS-113,Production Env is failed to fetch the Robot Live Status Control in Admin due to CORS error,PRIS Sprint 12
+Bug,PRIS-120,One User illegally use arm2 and arm4 in production env to earn points which led his point increased sharply,PRIS Sprint 12
+Bug,PRIS-111,Tele-op queue stuck with 1st user remaining time 0,PRIS Sprint 12
+Task,PRIS-106,Make Arm 2 (the previouse Monad Arm) invite when it is free without campaign,PRIS Sprint 12
+Task,PRIS-110,ARM 4 （Training Arm）,PRIS Sprint 12
+Bug,PRIS-109,Page keeps loading,PRIS Sprint 12
+Bug,PRIS-92,Wrong result for the doll compare score.,PRIS Sprint 12
+Bug,PRIS-89,fetch_tele_op_session_complete_status cannot calculate the session points correctly,PRIS Sprint 12
+Task,PRIS-84,Queue Notifications,PRIS Sprint 12
+Task,PRIS-99,add a stream switch button to the robot live status control panel,PRIS Sprint 12
+Task,PRIS-100,Save data from monad email campaign,PRIS Sprint 12
+Task,PRIS-101,Add email validiation checks to sign in process,PRIS Sprint 12
+Task,PRIS-112,Support Remove X or Re-link X account in account page,PRIS Sprint 12
+Task,PRIS-114,add google tag manager to the web,PRIS Sprint 12
+Bug,PRIS-115,"Solana Onchain record and DB record still mismatched for ""Verify Payment Records""",PRIS Sprint 12
+Task,PRIS-116,leave queue confirmation,PRIS Sprint 12
+Task,PRIS-117,add discord ID to the Account page,PRIS Sprint 12
+Task,PRIS-123,write the change summary for marketing team for sprint 12,PRIS Sprint 12

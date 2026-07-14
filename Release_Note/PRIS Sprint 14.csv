@@ -1,0 +1,25 @@
+Issue Type,Key,Summary,Status,Comments,Sprint,Assignee,Due date,Labels,Created,Updated,Reporter
+Task,PRIS-125,"remove the reward for messaging, due to too many bot activities",QA Varified,2,PRIS Sprint 14,Aparna Rangamani,,,2026-02-07,2026-03-06,Jason Wu
+Task,PRIS-126,add a backend job to clear duplicate position for queued users,QA Varified,2,PRIS Sprint 14,chris,,,2026-02-09,2026-03-11,chris
+Task,PRIS-133,add a password login screen only for beta-app.prismax.ai the front end,QA Varified,5,PRIS Sprint 14,Aparna Rangamani,,,2026-02-21,2026-03-06,Jason Wu
+Task,PRIS-127,"Add container height for connect wallet  panel, for all case, connected and not conected.
+make session completed UI for mobile",QA Varified,3,PRIS Sprint 14,Aparna Rangamani,,,2026-02-10,2026-03-06,chris
+Task,PRIS-131,develop the robotic ARM product database,QA Varified,5,PRIS Sprint 14,chris,,,2026-02-13,2026-03-17,Jason Wu
+Task,PRIS-135,"apply to become an operator
+Operator is a role on the Prisma platform for contributors of robot data. Users must proactively apply, and only after approval by an administrator can they upload robot trajectory data and earn rewards.
+
+Functional objectives:
+
+Users submit an Operator application (including robot information)
+
+Administrators review the application in the backend (approve / reject)
+
+Review results are synchronized to the user frontend in real time
+
+After approval, an email notification is sent to the user, and system administrators are also notified",QA Varified,10,PRIS Sprint 14,Aparna Rangamani,,,2026-02-24,2026-03-18,Jason Wu
+Task,PRIS-137,Upload Data Phase 1 - Check the selected data ,demo,2,PRIS Sprint 14,chris,,,2026-02-24,2026-03-17,Wanxin
+Task,PRIS-138,Upload Data Phase 2-  Based on PrismaX Robotics Collection Quality Standards,QA Varified,5,PRIS Sprint 14,chris,,,2026-02-24,2026-03-18,Wanxin
+Task,PRIS-145,replace the recapcha with Cloudflare for users from China,QA Varified,1,PRIS Sprint 14,chris,,,2026-03-06,2026-03-18,Jason Wu
+Task,PRIS-147,UI UX improvement for data uploading,In Progress,4,PRIS Sprint 14,chris,,,2026-03-10,2026-03-17,Wanxin
+Bug,PRIS-120,One User illegally use arm2 and arm4 in production env to earn points which led his point increased sharply,In Progress,2,PRIS Sprint 14,chris,2026-02-02,,2026-01-29,2026-03-18,Wanxin
+Task,PRIS-151,"Sprint 14, release summary",To Do,,PRIS Sprint 14,Wanxin,,,2026-03-18,2026-03-18,Jason Wu

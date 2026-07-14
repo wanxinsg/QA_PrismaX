@@ -7,3 +7,34 @@ __pycache__/
 
 .pytest_cache/
 **/.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Binary / large data files
+*.mcap
+*.mp4
+*.mov
+*.avi
+
+# Log and state files
+*.log
+**/log/
+**/logs/
+.last_pull_date
+.last_run_date
+.daily_pull_sent_at
+.last_regression_date
+*_cron.log
+
+# Binary Office / data files
+*.xlsx
+*.numbers
+*.xmind
+*.docx
+*.pdf
+
+# Test report output
+**/test_report/allure-results/
+**/test_report/allure-report/

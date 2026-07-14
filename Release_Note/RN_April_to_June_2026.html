@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Release Note — April to June 2026</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/dev/stdin" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Release Note — April to June 2026</h1>
+</header>
+<h1 id="release-note-april-to-june-2026">Release Note — April to June
+2026</h1>
+<h2 id="new-features-improvements">New Features &amp; Improvements</h2>
+<h3 id="robotics-data">Robotics Data</h3>
+<h4 id="data-browsing">Data Browsing</h4>
+<ul>
+<li>A sample details page is now available in the Robotics Data section
+for deeper episode-level inspection.</li>
+<li>Filters have been added to the Robotics Data tab to make browsing
+large datasets easier.</li>
+</ul>
+<h4 id="data-download">Data Download</h4>
+<ul>
+<li>Curated data packages can now be downloaded directly from the
+website.</li>
+<li>A manifest.json file can be exported for selected episodes,
+providing a structured index of all included data files and
+metadata.</li>
+<li>An API package can be created for selected episodes; the resulting
+Package ID can be used to download data programmatically via API
+key.</li>
+</ul>
+<h4 id="ai-assistant-hex">AI Assistant — HEX</h4>
+<ul>
+<li>HEX, an AI Data Assistant, is now live. It helps users navigate the
+platform and understand their data by answering questions related to
+platform content and collections.</li>
+</ul>
+<hr />
+<h3 id="vla">VLA</h3>
+<h4 id="upload-data">Upload Data</h4>
+<ul>
+<li>Users can apply to become an operator and upload robotics data (MCAP
++ videos) mapped to various task scenarios.</li>
+<li>An operators dashboard is now available, giving operators a
+centralised view to manage and track their submissions.</li>
+<li>Resumable uploads are now supported — if an upload is interrupted,
+it can be continued from where it left off without starting over.</li>
+<li>An upload history page has been added for operators to review past
+submissions at a glance.</li>
+<li>Scenario categories can now be selected during the upload flow to
+better organise and tag collected data.</li>
+</ul>
+<h4 id="verify-quality">Verify Quality</h4>
+<ul>
+<li>Verify Quality is now open to eligible members. Amplifier members
+can apply to become a Quality Assurance reviewer with 10 review chances
+per cycle; Innovator members receive 30.</li>
+<li>A review history page is available for validators to track their
+past activity and submissions.</li>
+<li>Three informational pages have been introduced to help users
+understand the programme: How Selection Works, View Scoring Rules, and
+My Earnings.</li>
+<li>After completing a review, a confirmation popup displays the points
+earned for that submission.</li>
+<li>A warning is shown if a validator tries to leave before completing
+all episodes in a batch; any unsubmitted answers are preserved in case
+the page is accidentally closed or refreshed.</li>
+</ul>
+<h4 id="register-robot">Register Robot</h4>
+<ul>
+<li>Robots from supported manufacturers — Airbot, AGILEX, I2RT Robotics,
+and Realman — can now be registered on the platform and used for data
+collection tasks.</li>
+</ul>
+<hr />
+<h3 id="robot-fleet">Robot Fleet</h3>
+<ul>
+<li>The Robot Fleet section has been redesigned as a hardware
+marketplace. Users can browse PrismaX-validated robots, view full
+specifications, and purchase directly from the platform.</li>
+<li>Currently listed models include Piper (Agilex Robotics), TOK2
+(Airbot), and YAM (I2RT Robotics) — all validated to meet PrismaX data
+quality standards.</li>
+</ul>
+<hr />
+<h3 id="platform-account">Platform &amp; Account</h3>
+<ul>
+<li>Chain selection has been moved into the Connect Modal for a cleaner
+and more intuitive wallet connection flow.</li>
+</ul>
+<hr />
+<h2 id="bug-fixes">Bug Fixes</h2>
+<ul>
+<li>Fixed an issue where robot reward points would occasionally fail to
+be applied to a user’s account.</li>
+<li>Fixed network errors encountered during tele-operation
+sessions.</li>
+<li>Resolved a security vulnerability based on user-reported
+feedback.</li>
+<li>Invalid or expired session tokens are now detected automatically and
+handled gracefully to prevent unexpected errors.</li>
+</ul>
+</body>
+</html>

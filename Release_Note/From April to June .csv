@@ -1,0 +1,88 @@
+PRIS-153,add the hover over effects for apply operator function
+PRIS-155,align the dropdown button design
+PRIS-124,collect ip address for members
+PRIS-158,develop the admin UI to manage tasks list database
+PRIS-162,Improve the video compress process to support large video file
+PRIS-159,VLA Data download process
+PRIS-120,One User illegally use arm2 and arm4 in production env to earn points which led his point increased sharply
+PRIS-148,UIUX improvement for QA review
+PRIS-168,Map the task based on the new documents
+PRIS-152,Implement the function for resuming uploading after interruption
+PRIS-142,Limit one doll_compare_reward for each robot_control session
+PRIS-154,show email icon and email once user login with email
+PRIS-156,add the upload history page
+PRIS-157,add the validator review history page
+PRIS-161,swap the high view video with cam_left video
+PRIS-163,Doll_compare_reward would fail sometimes
+PRIS-166,"User purchased both Amplifier and Innovator memberships, but the memberships are yet to be applied to the account"
+PRIS-174,modify the navigation for QA
+PRIS-182,Make it easier to swap robot IDs on the app
+PRIS-185,Some User bypass the check to register the illegal robot info
+PRIS-186,Robotics data download-Admin uploads tab — browse and select by upload ID
+PRIS-187,user can freely reigister realman robots
+PRIS-188,Upload for too many files will disconnect and need to use continue upload to reupload
+PRIS-192,QA samples selection for each upload
+PRIS-177,add scenario category for verify quality page
+PRIS-193,"Test the VLA Foundary and Robotics Data tab on Firefox, safari"
+PRIS-195,Implement to download organized data from our website
+PRIS-197,reject the failed episode and continue check and generate rerived_data for the rest of episode in one Upload task
+,
+,
+,
+,
+,
+,
+PRIS-198,enable customer to download data through API key
+PRIS-199,"Support ""API Download"" By Batches"
+PRIS-175,develop the AI Data assistant Hex
+PRIS-176,add sample details page on robotics data
+PRIS-184,add filter for the robotics data tab
+PRIS-191,operators dashboard
+PRIS-179,how selection works
+PRIS-180,view scoring rules
+PRIS-136,"apply to become an QA ""Validator"""
+PRIS-181,my earnings
+PRIS-178,improve the upload details page
+PRIS-194,detect if user's token invalid
+PRIS-208,connect improvement
+PRIS-165,usreRole should be force to update everytime when user login
+PRIS-200,Show episode_id for each episode under robotic-data page to align with QA review
+PRIS-201,Pre-load the next upcoming 2 episodes' videos during each round QA review
+PRIS-203,reminder for validator if they are quiting before complete all episodes in the upload
+PRIS-202,reminder popup after submit and earn points submitted
+PRIS-204,add a centered play button for the QA review page
+PRIS-207,Admin portal for admin to add or remove validators
+PRIS-210,Data SDK
+PRIS-211,user will encounter network error during the tele-operation
+PRIS-216,User Feedback Regarding Security
+PRIS-220,"Lengthy API package generations are bugged - package generates, but UI doesn't update, requiring a page refresh"
+PRIS-218,MD5 checksum in CDN links for download validation
+,
+PRIS-216,User Feedback Regarding Security
+PRIS-208,connect improvement
+PRIS-178,improve the upload details page
+PRIS-175,develop the AI Data assistant Hex
+PRIS-221,Add features to let HEX to answer information related questions
+PRIS-194,detect if user's token invalid
+PRIS-201,Pre-load the next upcoming 2 episodes' videos during each round QA review
+PRIS-226,Changed mcap validation to allow data with different topic to pass 25hz check
+PRIS-172,when opening Verify Quality it takes too long to loading the list
+PRIS-205,Validator should review each episode for at least 30 seconds
+PRIS-206,2x speed toggle for QA review
+PRIS-228,rate episode variation only at the end of the review not for every episode
+PRIS-229,Replace current error icon with hover message (cannot submit & earn until all critera is filled out)
+PRIS-231,Improve roarm_streamingserver.py to reduce obs crush
+PRIS-173,Upload review distribute
+PRIS-141,Reduce max connection issue
+PRIS-232,change the order of Tabs
+PRIS-233,add a marketing banner for VLA quality
+PRIS-235,"The user claims that the membership fee was successfully paid by credit card; however, the membership has not been activated on their account."
+PRIS-236,support galxe quest
+PRIS-239,remember the unsubmitted answers for QA page
+PRIS-240,Whole card should be clickable
+PRIS-249,QA review reward point not added to the user’s total points which is from get/user api
+PRIS-258,remove loading .... for both robotics and VLA tab
+PRIS-259,add a release counting down
+PRIS-262,remove robot fleet banner
+,
+PRIS-265,move chain selection icon into the Connect Modal
