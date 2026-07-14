@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-每日拉取多个仓库的testing分支并发送邮件报告
+每日拉取多个仓库分支并发送邮件报告
 
 用法:
     python3 daily_pull_testing_branches.py
@@ -28,13 +28,20 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-# 默认与 Prismax 主仓并列的四个 repo 目录名（PROJECT_ROOT 下）
+# 默认与 Prismax 主仓并列的五个 repo 目录名（PROJECT_ROOT 下）
 REPOSITORIES = [
     "app-prismax-rp",
     "app-prismax-rp-backend",
     "gateway-prismax-rp",
     "roarm-m3-web",
+    "prismax-python",
 ]
+
+# 分支策略：默认 testing，个别仓库可覆盖
+DEFAULT_TARGET_BRANCH = "testing"
+REPO_TARGET_BRANCHES = {
+    "prismax-python": "main",
+}
 
 
 class GitPullResult:
@@ -99,8 +106,9 @@ def run_git_command(
 
 
 def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
-    """拉取指定仓库的testing分支"""
+    """按仓库策略拉取指定分支（默认 testing，prismax-python 为 main）"""
     result = GitPullResult(repo_name, str(repo_path))
+    target_branch = REPO_TARGET_BRANCHES.get(repo_name, DEFAULT_TARGET_BRANCH)
     
     # 检查仓库是否存在
     if not repo_path.exists():
@@ -124,20 +132,20 @@ def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
         return result
     current_branch = stdout
     
-    # 切换到testing分支（如果不在testing分支）
-    if current_branch != "testing":
+    # 切换到目标分支（若当前不在目标分支）
+    if current_branch != target_branch:
         # 先尝试checkout已存在的本地分支
-        success, stdout, stderr = run_git_command(repo_path, ["checkout", "testing"])
+        success, stdout, stderr = run_git_command(repo_path, ["checkout", target_branch])
         if not success:
             # 如果本地分支不存在，创建并跟踪远程分支
             success, stdout, stderr = run_git_command(
                 repo_path, 
-                ["checkout", "-b", "testing", "origin/testing"]
+                ["checkout", "-b", target_branch, f"origin/{target_branch}"]
             )
             if not success:
-                result.error_message = f"无法切换到testing分支: {stderr}"
+                result.error_message = f"无法切换到{target_branch}分支: {stderr}"
                 return result
-        result.branch = "testing"
+        result.branch = target_branch
     else:
         result.branch = current_branch
     
@@ -149,7 +157,7 @@ def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
     result.old_commit_sha = old_commit
     
     # 拉取最新代码
-    success, stdout, stderr = run_git_command(repo_path, ["pull", "origin", "testing"])
+    success, stdout, stderr = run_git_command(repo_path, ["pull", "origin", target_branch])
     if not success:
         result.error_message = f"Git pull失败: {stderr}"
         return result
@@ -253,6 +261,7 @@ def send_email_report(results: List[GitPullResult]):
             <div class="summary">
                 <p><strong>执行时间:</strong> {now}</p>
                 <p><strong>总计:</strong> {len(results)} 个仓库</p>
+                <p><strong>分支策略:</strong> 默认 testing，prismax-python 使用 main</p>
                 <p><strong>成功:</strong> <span style="color: #27ae60;">{sum(1 for r in results if r.success)}</span></p>
                 <p><strong>失败:</strong> <span style="color: #e74c3c;">{sum(1 for r in results if not r.success)}</span></p>
             </div>
@@ -346,7 +355,7 @@ def send_email_report(results: List[GitPullResult]):
 def main():
     """主函数"""
     print("=" * 60)
-    print("Prismax Testing分支每日拉取脚本")
+    print("Prismax 每日分支拉取脚本")
     print("=" * 60)
     
     project_root = get_project_root()

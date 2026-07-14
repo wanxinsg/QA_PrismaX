@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-工作日 Daily Work：拉取四仓库 testing 分支 → 发邮件。
+工作日 Daily Work：拉取五仓库分支并发邮件（默认 testing，prismax-python 使用 main）。
 
 用法:
     python3 daily_work_pipeline.py
@@ -11,7 +11,7 @@ from __future__ import annotations
 import sys
 from typing import List
 
-from daily_pull_testing_branches import (
+from daily_pull_branches import (
     REPOSITORIES,
     GitPullResult,
     get_project_root,
