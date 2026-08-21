@@ -1,0 +1,13 @@
+Issue Type,Issue key,Issue id,Summary,Assignee,Assignee Id,Reporter,Reporter Id,Priority,Status,Resolution,Created,Updated,Due date
+Task,PRIS-277,22287,QA leaderboard,Aparna Rangamani,712020:68fdf3cb-429e-482c-837b-3f375475838a,Jason Wu,5c813f7fea7c3712b6e21923,Medium,demo,,01/Jul/26 12:15 PM,31/Jul/26 8:02 PM,
+Task,PRIS-278,22288,QA Admin Dashboard,Aparna Rangamani,712020:68fdf3cb-429e-482c-837b-3f375475838a,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,01/Jul/26 6:47 PM,21/Jul/26 3:08 AM,
+Story,PRIS-261,22270, add a new banner to the upload data tab,Aparna Rangamani,712020:68fdf3cb-429e-482c-837b-3f375475838a,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,20/Jun/26 2:40 AM,23/Jul/26 9:38 PM,
+Task,PRIS-271,22280,remove loading episode staging message,Aparna Rangamani,712020:68fdf3cb-429e-482c-837b-3f375475838a,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,24/Jun/26 1:07 AM,20/Jul/26 3:25 AM,
+Task,PRIS-300,22315,modify the VLA - Upload SDK quick start,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,16/Jul/26 5:12 PM,20/Jul/26 10:20 PM,
+Task,PRIS-299,22314,Update SDK based on new requirement,chris,712020:c655e838-9d47-4209-a728-dada6688e250,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Medium,QA Varified,Done,16/Jul/26 11:49 AM,22/Jul/26 8:22 PM,
+Task,PRIS-296,22311,add episodes limit effects on the frontend,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,15/Jul/26 3:14 AM,21/Jul/26 2:51 AM,
+Task,PRIS-286,22299,Implement Drag and Upload Function for Upload Data,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Wanxin,712020:31040dcc-c8c1-4fe6-8d3a-74bb75c0ac04,Medium,QA Varified,Done,07/Jul/26 1:18 AM,21/Jul/26 1:52 AM,
+Task,PRIS-297,22312,Robotics data sample detail page improvements,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Jason Wu,5c813f7fea7c3712b6e21923,Medium,QA Varified,Done,15/Jul/26 2:57 PM,19/Jul/26 9:33 PM,
+Task,PRIS-140,20518,Upload Data: detect duplicate files,chris,712020:c655e838-9d47-4209-a728-dada6688e250,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Medium,In Progress,,25/Feb/26 5:01 AM,23/Jul/26 9:21 PM,
+Task,PRIS-308,22358,Update the QA rules for round 1,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Wanxin,712020:31040dcc-c8c1-4fe6-8d3a-74bb75c0ac04,Medium,QA Varified,Done,27/Jul/26 9:58 PM,29/Jul/26 1:11 AM,
+Task,PRIS-309,22359,prioritize the most reviewed upload id to the top for QA review,chris,712020:c655e838-9d47-4209-a728-dada6688e250,Wanxin,712020:31040dcc-c8c1-4fe6-8d3a-74bb75c0ac04,Medium,QA Varified,Done,27/Jul/26 10:10 PM,29/Jul/26 4:38 AM,

@@ -1,0 +1,43 @@
+﻿用例ID,优先级,模块,场景,前置条件,操作步骤,预期结果,测试结果
+SDK-DL-001,P0,5.1 鉴权与环境变量,下载读取 PRISMAX_DOWNLOAD_API_KEY,包所有者账号持有有效 pxa_ Key；Package 为 ACTIVE,"设置环境变量 PRISMAX_DOWNLOAD_API_KEY=pxa_...；调用 prismax.download(pkg, out) 时不在代码中传入 api_key 参数，让 SDK 自动从环境变量读取",Session 创建成功，开始拉取文件；请求头 X-API-Key 值为 pxa_,☐
+SDK-DL-002,P0,5.1 鉴权与环境变量,两种 Key 同时存在时下载不误用上传 Key,同时设置 PRISMAX_UPLOAD_API_KEY=pxu_... 和 PRISMAX_DOWNLOAD_API_KEY=pxa_...,调用 download(),请求头使用 pxa_；pxu_ 不出现在 download-sessions 请求中,☐
+SDK-DL-003,P0,5.1 鉴权与环境变量,旧 PRISMAX_API_KEY 不能用于下载,只设 PRISMAX_API_KEY=pxa_...，不设 PRISMAX_DOWNLOAD_API_KEY,调用 download() 且不传 api_key,抛 PrismaxAuthError，提示设置 PRISMAX_DOWNLOAD_API_KEY,☐
+SDK-DL-004,P0,5.1 鉴权与环境变量,用 pxu_ Key 下载被本地拒绝,有效 pxu_ Key,"download(..., api_key=""pxu_..."")",立即抛 PrismaxAuthError，错误信息含 pxa_；后端无 Session 记录,☐
+SDK-DL-005,P0,5.1 鉴权与环境变量,用 pxa_ Key 查 upload status 被本地拒绝,有效 pxa_ Key,"prismax.status(upload_id, api_key=""pxa_..."")",抛 PrismaxAuthError，错误信息含 pxu_,☐
+SDK-DL-006,P0,5.1 鉴权与环境变量,不设任何 Key,清空所有相关环境变量,"download(pkg, out)",抛 PrismaxAuthError：api_key is required or PRISMAX_DOWNLOAD_API_KEY must be set.,☐
+SDK-DL-007,P0,5.1 鉴权与环境变量,CLI --api-key 覆盖无效的环境变量,环境变量为错误/过期 Key；--api-key 传入正确 pxa_,prismax download pkg --api-key pxa_valid --output ./out,使用 CLI 参数中的 Key，下载成功,☐
+SDK-DL-008,P1,5.1 鉴权与环境变量,空或纯空白的 package_id,有效 pxa_ Key,"download("""", out) 和 download(""   "", out)",抛 PrismaxValidationError: package_id is required.；不发出 HTTP 请求,☐
+SDK-DL-009,P0,5.2 Python / CLI Happy Path,Python 下载单 Episode Package,包所有者账号；Package A（1 个 Episode，含 mcap + 3 主视频 + 1 个 additional）,"result = prismax.download(pkg, ""./dataset"")",返回 download_id、package_id、episode_count=1、file_count=5（或实际值）、output 为展开后的绝对路径,☐
+SDK-DL-010,P0,5.2 Python / CLI Happy Path,CLI 下载,包所有者账号；Package A（1 个 Episode，含 mcap + 3 主视频 + 1 个 additional）,prismax download pkg --output ./dataset,退出码 0；stdout 打印 Download ID / Package ID / Episodes / Files / Output；stderr 输出逐文件进度,☐
+SDK-DL-011,P1,5.2 Python / CLI Happy Path,CLI --no-progress 关闭进度输出,包所有者账号；Package A（1 个 Episode，含 mcap + 3 主视频 + 1 个 additional）,prismax download pkg --output ./dataset --no-progress,stderr 无逐文件进度；stdout summary 正常打印,☐
+SDK-DL-012,P0,5.2 Python / CLI Happy Path,create_download_session 只建 Session 不落盘,包所有者账号；有效 Package,只调用 prismax.create_download_session(pkg),返回含 samples / assets / url / cookie 的 Session；本地无新增文件,☐
+SDK-DL-013,P0,5.2 Python / CLI Happy Path,多 Episode Package 全量下载,Package B（2+ 个 Episode）,Python / CLI 下载,episode_count 等于 sample 数量；每个 Episode 的 mcap 和全部视频均落盘,☐
+SDK-DL-014,P1,5.2 Python / CLI Happy Path,--output 默认值为 ./dataset,当前工作目录可写,CLI 不传 --output,文件写入当前目录下的 dataset 文件夹,☐
+SDK-DL-015,P1,5.2 Python / CLI Happy Path,~ 路径自动展开,当前系统用户的主目录（即 ~ 对应的路径，如 /Users/wanxin）有写权限,"download(pkg, ""~/prismax-dl-test"")",文件写入 ~ 展开后的实际路径（如 /Users/wanxin/prismax-dl-test），不将 ~ 作为字面目录名处理,☐
+SDK-DL-016,P1,5.2 Python / CLI Happy Path,自定义 base_url 生效,当前测试环境的 pipeline 地址,传入 base_url 或设置 PRISMAX_BASE_URL,请求打到指定地址，不走默认 beta URL,☐
+SDK-DL-017,P0,5.3 文件内容与目录,目录结构与 relative_path 一致,Package A，episode_key 如 episode_1,下载后查看目录,存在 episode_1.mcap、episode_1/high.mp4、episode_1/left.mp4、episode_1/right.mp4、episode_1/<additional>.mp4；根目录下无 upload_<id>/ 前缀,☐
+SDK-DL-018,P0,5.3 文件内容与目录,additional videos 完整包含且不覆盖主视角,Package 含 additional video,对比 Session 中的文件列表与本地文件,本地文件与 Session 一一对应；additional 未替代 env/left/right 的位置,☐
+SDK-DL-019,P0,5.3 文件内容与目录,CDN Cookie 有效且为每文件独立,真实 CDN 环境,① SDK 正常下载；② 去掉 Cookie 直接 GET 同一 URL,SDK 下载成功（200）；去掉 Cookie 的请求被 CDN 拒绝（403 / 401）,☐
+SDK-DL-020,P0,5.3 文件内容与目录,文件完整可读,Session 包含 size_bytes,比对本地文件大小与 Session 返回值,大小一致（或与 CDN Content-Length 一致）；mcap / mp4 文件可正常打开,☐
+SDK-DL-021,P1,5.3 文件内容与目录,同路径文件被覆盖,output 下已存在同路径但内容不同的文件,再次调用 download(),旧文件被新内容覆盖；不跳过,☐
+SDK-DL-022,P1,5.3 文件内容与目录,MD5 人工抽查（SDK 不做，测试补充）,Session 返回 md5_hash,对本地文件计算 base64 MD5 并比对,与 Session 中的值一致；不一致记为缺陷（对应 R05），即使 SDK 返回成功,☐
+SDK-DL-023,P0,5.4 后端错误与权限,无效 / 已撤销的 Key,错误字符串或已 revoke 的 pxa_ Key,调用 download(),抛 PrismaxAuthError；本地无业务文件（或仅空目录）,☐
+SDK-DL-024,P0,5.4 后端错误与权限,使用他人 Key 下载对方 Package,非包所有者账号的 pxa_ Key + 包所有者账号的 package_id,调用 download(),抛 PrismaxAuthError（403，package does not belong to this API key）；非包所有者账号无新 download 记录；包所有者账号下载计数不变,☐
+SDK-DL-025,P0,5.4 后端错误与权限,不存在的 package_id,合法 pxa_ Key,"download(""pkg_not_exist"", out)",抛 PrismaxAuthError（403，package not found）；响应中不含任何文件 URL,☐
+SDK-DL-026,P1,5.4 后端错误与权限,INACTIVE Package,Package 状态非 ACTIVE,调用 download(),抛 PrismaxApiError（400，package is not active）,☐
+SDK-DL-027,P1,5.4 后端错误与权限,无 Episode 的空 Package,Package 无 episode 映射,调用 download(),抛 PrismaxApiError（400，package has no episodes）,☐
+SDK-DL-028,P0,5.4 后端错误与权限,Membership 失效，Key 仍 ACTIVE,会员失效账号；记录 last_used_at 当前值,调用 download(),抛 PrismaxAuthError（403）；last_used_at 不更新,☐
+SDK-DL-029,P0,5.4 后端错误与权限,月额度不足,额度已满账号；Package 含未授权新 Episode,调用 download(),抛 PrismaxApiError（402）；本地无业务文件；used_episodes 不超卖,☐
+SDK-DL-030,P1,5.4 后端错误与权限,Package 内 Episode 均已在 My Data 中（额度已授权）,Package 内所有 Episode 的 quota_authorized_at 非空,调用 download(),Session 创建成功；used_episodes 不因本次下载增加；文件正常下载,☐
+SDK-DL-031,P1,5.4 后端错误与权限,同一 Package 连续两次下载,包所有者账号；额度充足,连续调用两次 download(),两次均可拉取文件；各自生成独立 Session/history 记录（SDK 无幂等头，对照 R08 确认是否符合产品预期）,☐
+SDK-DL-032,P0,5.5 失败恢复与非功能,Session 成功但某个文件 CDN 下载失败,通过代理或错误 URL 模拟单文件 5xx,调用 download(),抛 PrismaxApiError，错误信息含失败文件的 relative_path；查后端 data_downloads 确认记账状态（对照 R04）,☐
+SDK-DL-033,P1,5.5 失败恢复与非功能,重试成功,前两次请求失败，第三次成功,retries=3 下调用 download(),最终文件完整；stderr 可观察到重试行为,☐
+SDK-DL-034,P1,5.5 失败恢复与非功能,半文件残留后重新下载,下载中途杀进程或断网,检查 output 目录；再次下载,中断后存在截断/空文件；再次成功下载后该路径被完整文件覆盖,☐
+SDK-DL-035,P1,5.5 失败恢复与非功能,并发度对结果无影响,多文件 Package,分别用 --concurrency 1 和默认 5 各下载一次,文件集合完全一致；并发 5 更快，无文件缺失或内容串扰,☐
+SDK-DL-036,P1,5.5 失败恢复与非功能,单文件超时触发重试,大 mcap 文件；--timeout 1,调用 download(),超时后按 retries 次数重试；不出现无限挂起,☐
+SDK-DL-037,P2,5.5 失败恢复与非功能,非法 relative_path — 路径穿越（可用 mock）,mock Session 返回 ../etc/passwd 或绝对路径,调用 _download_items() / download(),抛 PrismaxValidationError；不向 output 目录外写入任何文件,☐
+SDK-DL-038,P2,5.5 失败恢复与非功能,重复 relative_path（可用 mock）,mock Session 中两个 asset 的 relative_path 相同,调用解析逻辑,抛 PrismaxValidationError: Download session contains duplicate path,☐
+SDK-DL-039,P0,5.6 上传回归,上传使用 PRISMAX_UPLOAD_API_KEY,有效 pxu_ Key；同时存在 pxa_ Key,不传 api_key，调用 prismax.status(upload_id) 或 recent_uploads(),请求头使用 pxu_；pxa_ 不出现在上传相关请求中,☐
+SDK-DL-040,P0,5.6 上传回归,旧 PRISMAX_API_KEY 不能用于上传（breaking change）,只设 PRISMAX_API_KEY=pxu_...；不设 PRISMAX_UPLOAD_API_KEY,调用 recent_uploads() / upload(),抛 PrismaxAuthError，提示设置 PRISMAX_UPLOAD_API_KEY；发版说明须覆盖此变更,☐
+SDK-DL-041,P1,5.6 上传回归,上传 CLI 子命令不受 download 影响,已有小数据集上传记录,prismax scenarios、prismax uploads --limit 1,行为与本次改动前一致（在新环境变量名下）,☐
+SDK-DL-042,P1,5.6 上传回归,版本标识正确,已安装当前包,检查 prismax.__version__ 和请求 User-Agent,__version__ 为 0.3.0b1；User-Agent 为 prismax-sdk/0.3.0b1,☐

@@ -1,0 +1,901 @@
+[
+  {
+    "id": "root",
+    "revisionId": "a9ce0edf-0299-4fd8-88d1-2f6d0985571b",
+    "class": "sheet",
+    "rootTopic": {
+      "id": "root_topic",
+      "class": "topic",
+      "title": "Queue Notification Feature Test Cases",
+      "structureClass": "org.xmind.ui.logic.right",
+      "children": {
+        "attached": [
+          {
+            "id": "module_a",
+            "title": "Module A: Notification Permission Request - Desktop (6 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_001",
+                  "title": "QN-M-001 [P0]: First Join Queue Shows Permission Prompt",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "001_1",
+                        "title": "Preconditions: Desktop browser, viewport>1000px, permission default"
+                      },
+                      {
+                        "id": "001_2",
+                        "title": "Steps: Join queue → Observe prompt"
+                      },
+                      {
+                        "id": "001_3",
+                        "title": "Expected: Show light gray prompt + Enable button + Close button"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_002",
+                  "title": "QN-M-002 [P0]: Click Enable Triggers Permission Request",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "002_1",
+                        "title": "Preconditions: Prompt displayed"
+                      },
+                      {
+                        "id": "002_2",
+                        "title": "Steps: Click Enable → Allow permission"
+                      },
+                      {
+                        "id": "002_3",
+                        "title": "Expected: Prompt disappears + Show success message for 10s"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_003",
+                  "title": "QN-M-003 [P1]: Click Close Button Hides Prompt",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "003_1",
+                        "title": "Steps: Click X close button"
+                      },
+                      {
+                        "id": "003_2",
+                        "title": "Expected: Prompt disappears + No permission request triggered"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_004",
+                  "title": "QN-M-004 [P1]: Prompt Disappears After Denying Permission",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "004_1",
+                        "title": "Steps: Click Enable → Block permission"
+                      },
+                      {
+                        "id": "004_2",
+                        "title": "Expected: Prompt disappears + Queue operates normally"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_005",
+                  "title": "QN-M-005 [P0]: No Prompt When Permission Already Granted",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "005_1",
+                        "title": "Preconditions: Permission set to granted"
+                      },
+                      {
+                        "id": "005_2",
+                        "title": "Expected: No prompt + Ready to send notifications"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_006",
+                  "title": "QN-M-006 [P1]: No Prompt When Permission Already Denied",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "006_1",
+                        "title": "Preconditions: Permission set to denied"
+                      },
+                      {
+                        "id": "006_2",
+                        "title": "Expected: No prompt + Queue operates normally"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_b",
+            "title": "Module B: Notification Permission Request - Mobile (1 Case)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_007",
+                  "title": "QN-M-007 [P0]: Mobile Does Not Show Permission Prompt",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "007_1",
+                        "title": "Preconditions: Mobile device or viewport<1000px"
+                      },
+                      {
+                        "id": "007_2",
+                        "title": "Steps: Join queue"
+                      },
+                      {
+                        "id": "007_3",
+                        "title": "Expected: No prompt + Queue operates normally"
+                      },
+                      {
+                        "id": "007_4",
+                        "title": "Rationale: Mobile browser notification API support inconsistent"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_c",
+            "title": "Module C: Notification Trigger - Position #6 (2 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_008",
+                  "title": "QN-M-008 [P0]: Send First Notification at Position #6",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "008_1",
+                        "title": "Preconditions: Desktop + permission granted + queue≥6 people"
+                      },
+                      {
+                        "id": "008_2",
+                        "title": "Steps: Wait for position to reach #6"
+                      },
+                      {
+                        "id": "008_3",
+                        "title": "Expected: Receive notification + title 'position 6' + lasts 12s"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_009",
+                  "title": "QN-M-009 [P1]: Position #6 Notification Content Accuracy",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "009_1",
+                        "title": "Verify: Title, body, icon, badge"
+                      },
+                      {
+                        "id": "009_2",
+                        "title": "Body: 'It's almost your turn! Please continue to monitor...'"
+                      },
+                      {
+                        "id": "009_3",
+                        "title": "Icon: PrismaX logo (favicon.svg)"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_d",
+            "title": "Module D: Notification Trigger - Position #2 (3 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_010",
+                  "title": "QN-M-010 [P0]: Send Second Notification at Position #2",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "010_1",
+                        "title": "Preconditions: Already received position #6 notification"
+                      },
+                      {
+                        "id": "010_2",
+                        "title": "Steps: Wait for position to reach #2"
+                      },
+                      {
+                        "id": "010_3",
+                        "title": "Expected: Receive notification + title 'position 2' + independent alert"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_011",
+                  "title": "QN-M-011 [P1]: Position #2 Notification Content Accuracy",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "011_1",
+                        "title": "Verify: Title, body, icon"
+                      },
+                      {
+                        "id": "011_2",
+                        "title": "Body: 'You're up next! There is one user ahead...'"
+                      },
+                      {
+                        "id": "011_3",
+                        "title": "Tone: Urgent, reminding turn is coming"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_012",
+                  "title": "QN-M-012 [P1]: No Notification When Activating at Position #1",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "012_1",
+                        "title": "Preconditions: Current position #2"
+                      },
+                      {
+                        "id": "012_2",
+                        "title": "Steps: Wait for position to reach #1"
+                      },
+                      {
+                        "id": "012_3",
+                        "title": "Expected: No notification + Show in-app message + Auto switch control panel"
+                      },
+                      {
+                        "id": "012_4",
+                        "title": "Rationale: User has turn, should be on page"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_e",
+            "title": "Module E: Prevent Duplicate Notifications (2 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_013",
+                  "title": "QN-M-013 [P0]: Same Position No Duplicate Sends",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "013_1",
+                        "title": "Steps: After reaching #6, stay for 30s"
+                      },
+                      {
+                        "id": "013_2",
+                        "title": "Expected: Position #6 only 1 notification + Position #2 only 1 notification"
+                      },
+                      {
+                        "id": "013_3",
+                        "title": "Total: Only 2 notifications received"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_014",
+                  "title": "QN-M-014 [P1]: No Duplicate Sends After Fast Track",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "014_1",
+                        "title": "Preconditions: Amplifier account + queue≥6 people"
+                      },
+                      {
+                        "id": "014_2",
+                        "title": "Steps: Position #6 notification → Fast Track jump"
+                      },
+                      {
+                        "id": "014_3",
+                        "title": "Expected: No duplicate #6 notification + Flags properly managed"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_f",
+            "title": "Module F: State Reset (2 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_015",
+                  "title": "QN-M-015 [P0]: Reset Notification Flags After Leaving Queue",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "015_1",
+                        "title": "Steps: Position #6 notification → Leave queue → Rejoin"
+                      },
+                      {
+                        "id": "015_2",
+                        "title": "Expected: Can receive notification again at #6"
+                      },
+                      {
+                        "id": "015_3",
+                        "title": "Verify: Notification flags properly reset"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_016",
+                  "title": "QN-M-016 [P0]: Reset Notification Flags After Control Activation",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "016_1",
+                        "title": "Steps: Complete flow (#6+#2 notifications → Activate control → End control → Rejoin)"
+                      },
+                      {
+                        "id": "016_2",
+                        "title": "Expected: Second queue round can receive #6 and #2 notifications again"
+                      },
+                      {
+                        "id": "016_3",
+                        "title": "Verify: Flags reset after control activation"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_g",
+            "title": "Module G: Boundary Conditions (4 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_017",
+                  "title": "QN-M-017 [P1]: Skip Position #6 (#7→#5)",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "017_1",
+                        "title": "Scenario: Multiple people leave simultaneously, skip position #6"
+                      },
+                      {
+                        "id": "017_2",
+                        "title": "Expected: No #6 notification + System doesn't send for unexperienced positions"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_018",
+                  "title": "QN-M-018 [P1]: Skip Position #2 (#3→#1)",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "018_1",
+                        "title": "Scenario: Position #2 user leaves, jump directly to #1"
+                      },
+                      {
+                        "id": "018_2",
+                        "title": "Expected: No #2 notification + Directly activate control"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_019",
+                  "title": "QN-M-019 [P1]: Browser Does Not Support Notification API",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "019_1",
+                        "title": "Preconditions: Old browser or disable Notification API"
+                      },
+                      {
+                        "id": "019_2",
+                        "title": "Expected: No prompt + Queue operates normally + Core features not affected"
+                      },
+                      {
+                        "id": "019_3",
+                        "title": "Rationale: Notification is enhancement, not core feature"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_020",
+                  "title": "QN-M-020 [P2]: Rapidly Join/Leave Queue Consecutively",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "020_1",
+                        "title": "Steps: 5 consecutive join/leave operations"
+                      },
+                      {
+                        "id": "020_2",
+                        "title": "Expected: Each operation succeeds + No errors + No memory leaks"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_h",
+            "title": "Module H: Cross-Browser Compatibility (5 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_021",
+                  "title": "QN-M-021 [P0]: Chrome 120+ Complete Flow",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "021_1",
+                        "title": "Verify: All features work + Notifications elegant + Performance smooth"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_022",
+                  "title": "QN-M-022 [P1]: Firefox 120+ Complete Flow",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "022_1",
+                        "title": "Verify: All features work + Follows Firefox notification style"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_023",
+                  "title": "QN-M-023 [P1]: Safari 17+ Complete Flow",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "023_1",
+                        "title": "Verify: All features work + Follows macOS notification center style"
+                      },
+                      {
+                        "id": "023_2",
+                        "title": "Note: Safari has late support for notification API"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_024",
+                  "title": "QN-M-024 [P1]: iOS Safari Mobile Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "024_1",
+                        "title": "Preconditions: iOS 17+ device"
+                      },
+                      {
+                        "id": "024_2",
+                        "title": "Expected: No prompt + UI adapted for mobile"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_025",
+                  "title": "QN-M-025 [P1]: Android Chrome Mobile Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "025_1",
+                        "title": "Preconditions: Android 13+ device"
+                      },
+                      {
+                        "id": "025_2",
+                        "title": "Expected: No prompt + UI adapted for mobile"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_i",
+            "title": "Module I: User Experience & Performance (4 Cases)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_026",
+                  "title": "QN-M-026 [P2]: Notification Response Time Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "026_1",
+                        "title": "Measure: Latency from position update to notification display"
+                      },
+                      {
+                        "id": "026_2",
+                        "title": "Expected: Latency<500ms"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_027",
+                  "title": "QN-M-027 [P2]: Permission Prompt UI Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "027_1",
+                        "title": "Verify: Background #1a2332 + Border #2a3647 + Radius 12px"
+                      },
+                      {
+                        "id": "027_2",
+                        "title": "Verify: Enable button #38CB89 + Hover #059669"
+                      },
+                      {
+                        "id": "027_3",
+                        "title": "Verify: Follows PrismaX brand style"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_028",
+                  "title": "QN-M-028 [P2]: Notification Click Behavior Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "028_1",
+                        "title": "Preconditions: PrismaX tab in background"
+                      },
+                      {
+                        "id": "028_2",
+                        "title": "Expected: Click notification → Focus window → Activate tab"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "qn_m_029",
+                  "title": "QN-M-029 [P2]: Notification Auto-Close Time Verification",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "029_1",
+                        "title": "Measure: Notification display duration"
+                      },
+                      {
+                        "id": "029_2",
+                        "title": "Expected: Auto-close after ~12s (±1s)"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "module_j",
+            "title": "Module J: Regression Testing (1 Case)",
+            "children": {
+              "attached": [
+                {
+                  "id": "qn_m_030",
+                  "title": "QN-M-030 [P0]: Core Queue Functionality Not Affected",
+                  "children": {
+                    "attached": [
+                      {
+                        "id": "030_1",
+                        "title": "Verify: Join queue → View list → Wait for turn → Activate control → Control 5min → End"
+                      },
+                      {
+                        "id": "030_2",
+                        "title": "Expected: All core features work + Notification is enhancement"
+                      },
+                      {
+                        "id": "030_3",
+                        "title": "Key: Queue operates normally regardless of notification permission status"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "summary",
+            "title": "📊 Test Summary",
+            "children": {
+              "attached": [
+                {
+                  "id": "sum_1",
+                  "title": "Total: 30 Test Cases"
+                },
+                {
+                  "id": "sum_2",
+                  "title": "P0 Cases: 11 (Blocker - Core Features)"
+                },
+                {
+                  "id": "sum_3",
+                  "title": "P1 Cases: 14 (Critical - Important Features)"
+                },
+                {
+                  "id": "sum_4",
+                  "title": "P2 Cases: 5 (Major - Enhancement Features)"
+                }
+              ]
+            }
+          },
+          {
+            "id": "release",
+            "title": "📈 Release Entry Criteria",
+            "children": {
+              "attached": [
+                {
+                  "id": "rel_1",
+                  "title": "P0 Cases: 100% Pass"
+                },
+                {
+                  "id": "rel_2",
+                  "title": "P1 Cases: ≥95% Pass"
+                },
+                {
+                  "id": "rel_3",
+                  "title": "P2 Cases: ≥90% Pass"
+                },
+                {
+                  "id": "rel_4",
+                  "title": "No Unresolved P0/P1 Defects"
+                },
+                {
+                  "id": "rel_5",
+                  "title": "Chrome Browser: 100% Compatible"
+                },
+                {
+                  "id": "rel_6",
+                  "title": "Core Queue Features: Not Affected"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "title": "Queue Notification Feature (PRIS-84) Test Cases",
+    "extensions": [
+      {
+        "provider": "org.xmind.ui.skeleton.structure.style",
+        "content": {
+          "centralTopic": "org.xmind.ui.logic.right"
+        }
+      }
+    ],
+    "theme": {
+      "centralTopic": {
+        "id": "c035580b-d278-4220-adf5-12ed7de4f820",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "28pt",
+          "fo:font-weight": "600",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "center",
+          "fill-pattern": "solid",
+          "line-width": "2pt",
+          "line-pattern": "solid",
+          "border-line-width": "0pt",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.roundedRect",
+          "line-class": "org.xmind.branchConnection.roundedfold",
+          "arrow-end-class": "org.xmind.arrowShape.none",
+          "alignment-by-level": "actived"
+        }
+      },
+      "mainTopic": {
+        "id": "f82ee785-4e83-44bf-aeec-e5318d6ef3e1",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "18pt",
+          "fo:font-weight": "600",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "left",
+          "fill-pattern": "solid",
+          "line-width": "inherited",
+          "line-pattern": "inherited",
+          "border-line-width": "0pt",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.roundedRect",
+          "line-class": "org.xmind.branchConnection.roundedElbow",
+          "arrow-end-class": "inherited",
+          "alignment-by-level": "inherited"
+        }
+      },
+      "subTopic": {
+        "id": "47e7cf5c-89ea-45ba-a345-59219d339ea5",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "14pt",
+          "fo:font-weight": "400",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "left",
+          "fill-pattern": "solid",
+          "line-width": "inherited",
+          "line-pattern": "inherited",
+          "border-line-width": "0pt",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.roundedRect",
+          "line-class": "org.xmind.branchConnection.roundedElbow",
+          "arrow-end-class": "inherited",
+          "alignment-by-level": "inherited"
+        }
+      },
+      "floatingTopic": {
+        "id": "0e2d9321-77d5-4e4e-89f4-a71875e48232",
+        "properties": {
+          "fo:font-family": "Montserrat",
+          "fo:font-size": "14pt",
+          "fo:font-weight": "normal",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "center",
+          "fill-pattern": "solid",
+          "line-width": "inherited",
+          "line-pattern": "solid",
+          "border-line-width": "0pt",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.roundedRect",
+          "line-class": "org.xmind.branchConnection.roundedElbow",
+          "arrow-end-class": "org.xmind.arrowShape.none",
+          "alignment-by-level": "inherited"
+        }
+      },
+      "summaryTopic": {
+        "id": "8692be8b-43ae-4039-8f42-1eccd81e26e0",
+        "properties": {
+          "fo:font-family": "Montserrat",
+          "fo:font-size": "14pt",
+          "fo:font-weight": "400",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "center",
+          "fill-pattern": "none",
+          "line-width": "inherited",
+          "line-pattern": "inherited",
+          "border-line-width": "inherited",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.roundedRect",
+          "line-class": "org.xmind.branchConnection.roundedElbow",
+          "arrow-end-class": "inherited",
+          "alignment-by-level": "inherited"
+        }
+      },
+      "calloutTopic": {
+        "id": "0dc32ad0-fe1f-4999-abae-46bca4e410b4",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "14pt",
+          "fo:font-weight": "600",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "left",
+          "fill-pattern": "solid",
+          "line-width": "inherited",
+          "line-pattern": "inherited",
+          "border-line-width": "inherited",
+          "border-line-pattern": "inherited",
+          "shape-class": "org.xmind.topicShape.ellipse",
+          "line-class": "org.xmind.branchConnection.roundedElbow",
+          "arrow-end-class": "inherited",
+          "alignment-by-level": "inherited"
+        }
+      },
+      "importantTopic": {
+        "id": "7c147395-4867-46f6-8199-92e8b5bd940c",
+        "properties": {
+          "fo:font-weight": "bold",
+          "fill-pattern": "solid",
+          "border-line-width": "0"
+        }
+      },
+      "minorTopic": {
+        "id": "f26910b4-e632-4d33-95d1-471110e28114",
+        "properties": {
+          "fo:font-weight": "bold",
+          "fill-pattern": "solid",
+          "border-line-width": "0"
+        }
+      },
+      "expiredTopic": {
+        "id": "fdfe4859-0031-4804-a7bb-a4a7b90d0ae8",
+        "properties": {
+          "fo:text-decoration": "line-through",
+          "fill-pattern": "none"
+        }
+      },
+      "summary": {
+        "id": "6452c836-9100-4ca5-9e18-2291437315ee",
+        "properties": {
+          "line-width": "2pt",
+          "line-pattern": "solid",
+          "shape-class": "org.xmind.summaryShape.square"
+        }
+      },
+      "boundary": {
+        "id": "4a14b481-fdd9-4fba-ac28-fea9a0dd382a",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "14pt",
+          "fo:font-weight": "600",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "center",
+          "fill-pattern": "solid",
+          "line-width": "2",
+          "line-pattern": "dash",
+          "shape-class": "org.xmind.boundaryShape.roundedRect"
+        }
+      },
+      "relationship": {
+        "id": "0bc301c4-1e38-424d-9c73-6841e2180a97",
+        "properties": {
+          "fo:font-family": "NeverMind",
+          "fo:font-size": "13pt",
+          "fo:font-weight": "600",
+          "fo:font-style": "normal",
+          "fo:text-transform": "manual",
+          "fo:text-decoration": "none",
+          "fo:text-align": "center",
+          "line-width": "2",
+          "line-pattern": "dash",
+          "shape-class": "org.xmind.relationshipShape.curved",
+          "arrow-begin-class": "org.xmind.arrowShape.none",
+          "arrow-end-class": "org.xmind.arrowShape.triangle"
+        }
+      },
+      "map": {
+        "id": "a363b967-4e34-461e-a4bc-8b6e3719a02d",
+        "properties": {
+          "line-tapered": "none"
+        }
+      },
+      "skeletonThemeId": "a148ee55687bdfc44af2fa5f16"
+    }
+  }
+]

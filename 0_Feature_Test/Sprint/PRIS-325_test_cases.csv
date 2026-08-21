@@ -1,0 +1,108 @@
+TC编号,功能模块,测试目标,前置条件,操作步骤,预期结果,优先级,测试类型
+TC-01,模块一：Approved行点击与Detail Modal入口,Approved行点击打开Detail Modal,Approved Tab有至少一条记录,"1. 进入Admin Portal → Operator Applications → Approved Tab
+2. 点击某条Approved Operator行（避开按钮区域）","1. 弹出Operator Detail Modal
+2. Header显示该Operator邮箱
+3. Header显示User ID（格式 ID XXXXX）
+4. 显示Approved状态pill
+5. 每条Approved行末尾可见›指示符",高,E2E/UI
+TC-02,模块一：Approved行点击与Detail Modal入口,Pending / Denied行不可点击打开Modal,Pending Tab有记录,"1. 切换到Pending Tab
+2. 点击任意Pending行（非按钮区域）","无Modal弹出
+无任何路由跳转",高,E2E/UI
+TC-03,模块一：Approved行点击与Detail Modal入口,行内按钮点击不触发Detail Modal（事件传播隔离）,Approved Tab有至少一条记录,"1. 点击某Approved行的Dashboard按钮
+2. 关闭Dashboard返回
+3. 再次点击同一行的Deny按钮并在confirm对话框选Cancel","1. Dashboard按钮：跳转UploadDashboard，不打开Detail Modal
+2. Deny + Cancel：不打开Detail Modal，该行仍在Approved Tab",高,E2E/UI
+TC-04,模块二：Operator Detail Modal — 信息展示,Stats卡片数据正确加载,已打开任意Approved Operator的Detail Modal,打开Detail Modal，观察Stats区域,"1. Approved on：显示格式化时间（如Aug 20, 2026, 10:30 AM）
+2. Episodes uploaded：显示非负整数
+3. Last upload：有上传则显示时间，否则显示—
+4. Active upload keys：与下方Keys区ACTIVE数量一致
+5. 加载中四个stat均显示—",高,E2E/UI
+TC-05,模块二：Operator Detail Modal — 信息展示,Registered Robots区 — 有机器人,该Operator已注册至少1台机器人,打开该Operator的Detail Modal，查看Registered robots区,"每条机器人显示{manufacturer} {model}、{serial_number}
+状态显示Paired pill",中,E2E/UI
+TC-06,模块二：Operator Detail Modal — 信息展示,Registered Robots区 — 无机器人,该Operator未注册任何机器人,打开该Operator的Detail Modal，查看Registered robots区,显示"No registered robots."空状态文案,低,E2E/UI
+TC-07,模块三：Upload API Keys — 列表展示,Keys列表正常展示（有Keys）,该Operator至少有1条Upload Key,打开Detail Modal，滚动到Upload API keys区域,"1. 表头：Label / Key / Created / Last used / Status
+2. Key列显示{key_prefix}••••••••••••••••••
+3. ACTIVE：绿色Active pill + Delete按钮
+4. REVOKED：灰色Revoked pill，无Delete按钮
+5. 列表按创建时间降序排列",高,E2E/UI
+TC-08,模块三：Upload API Keys — 列表展示,Keys列表空状态,该Operator无任何Upload Key,打开Detail Modal，查看Upload API keys区域,"显示No upload keys yet
+显示This operator can't push episodes until you create one.",中,E2E/UI
+TC-09,模块三：Upload API Keys — 列表展示,多Key共存展示,—,"1. 为某Operator创建3条Upload Key
+2. 吊销其中1条
+3. 重新打开Detail Modal","1. 显示3条Key
+2. 已吊销Key显示REVOKED pill，无Delete按钮
+3. 2条ACTIVE Key各显示Delete按钮
+4. Stats中Active upload keys为2
+5. 列表按创建时间降序排列（最新在最前）",中,E2E/UI
+TC-10,模块四：Upload API Keys — 创建,创建Upload Key完整流程（有Label）,已打开Operator Detail Modal,"1. 点击Create upload key
+2. 填写Label: Bench Station A
+3. 点击Create key
+4. 查看Key created Modal
+5. 点击Done","1. 弹出创建Modal，含Label输入框
+2. 创建成功后创建Modal关闭
+3. 弹出Key created Modal，显示完整api_key
+4. 提示Copy it now — you won't be able to see it again.
+5. 提供Copy按钮（点后变✓，约1.8s恢复）
+6. 显示安全提示文案
+7. Done后Modal关闭，列表新增Bench Station A ACTIVE条目
+8. Stats Active upload keys计数+1",高,E2E/UI
+TC-11,模块四：Upload API Keys — 创建,创建Upload Key — Label为空,已打开创建Key Modal,"1. 不填写Label
+2. 直接点击Create key","成功创建
+列表新增条目，Label列显示—",低,E2E/UI
+TC-12,模块四：Upload API Keys — 创建,创建Modal — 取消,已打开创建Key Modal,"1. 填写Label
+2. 点击Cancel","创建Modal关闭
+Keys列表无新增
+Detail Modal仍打开",中,E2E/UI
+TC-13,模块四：Upload API Keys — 创建,创建Key进行中UI防重复,已点击Create key（网络慢/throttle）,点击Create key后立即观察Modal,"1. 按钮显示Creating… 且置灰（disabled）
+2. Cancel按钮置灰不可点
+3. 点击Overlay不关闭Modal",中,E2E/UI
+TC-14,模块五：Upload API Keys — 吊销,吊销ACTIVE Key完整流程,该Operator至少有1条ACTIVE Key,"1. 找到目标ACTIVE Key，点击Delete
+2. 查看确认Modal
+3. 点击Delete key","1. 确认Modal显示标题Delete {label或prefix}?
+2. 显示警告：Uploads using this key start failing immediately. Episodes already uploaded are not affected. This can't be undone.
+3. 吊销成功后确认Modal关闭
+4. 列表该Key状态变为Revoked，Delete按钮消失
+5. Stats Active upload keys计数-1",高,E2E/UI
+TC-15,模块五：Upload API Keys — 吊销,吊销Modal — 取消,已点击某ACTIVE Key的Delete,在确认Modal点击Keep key,"确认Modal关闭
+该Key仍为ACTIVE状态",中,E2E/UI
+TC-16,模块五：Upload API Keys — 吊销,吊销进行中UI防重复,已点击Delete key（网络慢/throttle）,点击Delete key后立即观察Modal,"1. 按钮显示Deleting… 且置灰
+2. Keep key按钮置灰
+3. 点击Overlay不关闭Modal",中,E2E/UI
+TC-17,模块六：Copy按钮,Key created Modal的Copy按钮,"已成功创建Upload Key，Key created Modal已弹出",点击Copy按钮,"1. Copy图标变为✓（Check图标）
+2. 约1.8秒后恢复为Copy图标
+3. 粘贴板内容与Modal中展示的完整api_key一致",中,E2E/UI
+TC-18,模块七：Detail Modal — 顶部操作,Open dashboard — Detail自动关闭,已打开某Operator的Detail Modal,点击顶部Open dashboard按钮,"1. Detail Modal关闭
+2. UploadDashboard视图打开，显示该Operator数据
+3. 关闭Dashboard后可返回Approved列表",中,E2E/UI
+TC-19,模块七：Detail Modal — 顶部操作,Deny operator — 成功（从Detail内发起）,已打开某APPROVED Operator的Detail Modal,"1. 点击Deny operator
+2. 在浏览器confirm对话框点击OK","1. Detail Modal自动关闭
+2. Approved Tab该Operator消失
+3. 该Operator出现在Denied Tab
+4. 该Operator所有ACTIVE Upload Keys已被自动吊销（API验证）",高,E2E/UI
+TC-20,模块七：Detail Modal — 顶部操作,Deny operator — 取消（从Detail内发起）,已打开某APPROVED Operator的Detail Modal,"1. 点击Deny operator
+2. 在浏览器confirm对话框点击Cancel","1. Detail Modal保持打开
+2. Approved Tab该Operator记录保留
+3. Deny operator按钮状态恢复（不显示Denying…）",高,E2E/UI
+TC-21,模块七：Detail Modal — 顶部操作,点击Overlay关闭Detail Modal,已打开Operator Detail Modal,点击Modal外部暗色Overlay区域,"Detail Modal关闭
+回到Operator Applications列表",中,E2E/UI
+TC-22,模块七：Detail Modal — 顶部操作,Back按钮关闭Detail Modal,已打开Operator Detail Modal,点击左上角← Back to approved operators,"Detail Modal关闭
+回到列表",中,E2E/UI
+TC-23,模块八：后端过滤逻辑修复验证,Approved Tab过滤以Live user_role为准,"DB中存在某用户：admin_review_status=approved，user_role!=operator（role在流程外被清除）",刷新Admin Portal，进入Operator Applications,"1. Approved Tab不显示该用户
+2. Denied或Pending Tab正确显示该用户（取决于admin_review_status）",高,E2E/API
+TC-24,模块八：后端过滤逻辑修复验证,Deny时自动吊销Upload Keys（API层验证）,目标Operator已有多条ACTIVE Upload Keys,"1. 通过Admin Portal Deny该Operator（Approved → Deny路径）
+2. 调用GET /data/admin/upload-api-keys?user_id=X 验证","1. 所有keys的status均为REVOKED
+2. revoked_at字段为Deny操作时的时间",高,E2E/API
+TC-25,模块九：后端接口边界与鉴权,user_id缺失,—,GET /data/admin/upload-api-keys（不传user_id）,"HTTP 400
+body: user_id is required",高,API
+TC-26,模块九：后端接口边界与鉴权,user_id非整数,—,GET /data/admin/upload-api-keys?user_id=abc,HTTP 400,高,API
+TC-27,模块九：后端接口边界与鉴权,user_id不存在,—,"POST /data/admin/upload-api-keys，body: {user_id: 999999}","HTTP 404
+body: user not found",高,API
+TC-28,模块九：后端接口边界与鉴权,目标用户非Operator,—,"POST /data/admin/upload-api-keys，body: {user_id: 普通用户ID}","HTTP 400
+body: user is not an operator",高,API
+TC-29,模块九：后端接口边界与鉴权,吊销不属于该user_id的Key,—,DELETE /data/admin/upload-api-keys/<id>?user_id=<他人ID>,HTTP 404,高,API
+TC-30,模块九：后端接口边界与鉴权,吊销已REVOKED的Key,—,DELETE /data/admin/upload-api-keys/<revoked_id>?user_id=X,HTTP 404,高,API
+TC-31,模块九：后端接口边界与鉴权,未授权访问 — 无JWT,—,"不带Authorization header依次请求：
+GET /data/admin/upload-api-keys?user_id=1
+POST /data/admin/upload-api-keys
+DELETE /data/admin/upload-api-keys/1?user_id=1
+GET /data/admin/operator-detail/stats?user_id=1",所有接口返回401或403,高,API

@@ -1,0 +1,10 @@
+Embodiment,Description,Details
+Enactic OpenArm,Bimanual 7-DoF (+1 DoF gripper) arm with direct (leader-follower) or VR teleoperation,"- Open source arm allows multiple vendors for increased supply chain stability
+- Very smooth implementation of leader-follower teleop
+- 7-DoF arm increases overall ease-of-operation"
+Airbot TOK2,Bimanual 6-DoF mobile ALOHA clone,"- Turnkey system with mobile base at good prices
+- Highly available (ships immediately as of 11/14/25!)"
+AgileX PiperX,Single/bimanual 6-DoF QDD arm,"- Configurable in a variety of trims (single, bimanual, leader-follower)
+- Good global availability"
+ARX-5,Single/bimanual 6-DoF QDD arm,"- Configurable in a variety of trims (single, bimanual, leader-follower) 
+- Already in use by some large US labs"

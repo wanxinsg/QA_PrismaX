@@ -1,0 +1,552 @@
+Environment,Scenario,Objects,Details Description,Task Variators,General Variators,Notes,Wave,Complexity,Difficulty,Action
+Home,Fold clothes,"Clothes, pants, jackets, towels, sheets","The robot takes mixed laundry from a hamper, neatly folds it, and stacks it in piles according to type","- Items in the hamper
+- Introduce bulky items (jackets, etc.)
+- Introduce other types (towels, sheets)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Ubiquitous scenario; compact and easy to set up. Anchor task,1,,,Anchor task
+Home,Block manipulation,"Wooden blocks, LEGOs",Robot builds various structures from toy wooden blocks or LEGOs according to a diagram of the structure,"- Structure being built
+- Block type (wooden, LEGO)
+- Diagram complexity","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",High dexterity required; tests spatial reasoning and precision,2,,,Complexity
+Home,Tighten a loose pipe / unscrew pipe,"Pipe, wrench, pliers",Vary pipe types and ways of unscrewing/screwing,"- Pipe type and size
+- Tool type (wrench, pliers)
+- Tightening vs loosening direction","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests controlled force application and grip,2,,,"Force, Dexterity"
+Home,Sort toothbrushes into cups,"Toothbrushes, basket, cups, small containers",The robot picks out various toothbrush items from a basket and places them into cups or other small containers,"- The brands, colors, etc. of each toothbrush
+- The shape and material of the cup","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors","Long, thin objects require precise grip orientation",1,,,Dexterity
+Home,Sort toys by category,"Small toys (blocks, plushes, toy cars), basket, sorting containers","The robot sorts small toys (blocks, plushes, toy cars, …) from a basket into a few containers by type. The sorting is a blind start (the robot does not know the categories or the number of categories, building them up as it goes along)","- The type and appearance of each toy
+- The mix of categories
+- The number of categories
+- The presence of distractors (toys not in any category)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Blind-start sorting with highly varied object shapes and textures,3,,,"Complexity, Dexterity"
+Home,Arrange flowers in vase and place on shelf,"Flowers, basket, vases, shelf","The robot arranges flowers from a basket into vases, then places the vases onto a shelf","- The type of flowers
+- The type of vase
+- The distribution of the flowers in the basket and the vase
+- Distractors: dead/ugly flowers that shouldn't go in the vase, loose twigs","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Two-phase task: arrange flowers then place vase; distractors add difficulty,1,,,"Dexterity, Complexity"
+Home,Sort medicine bottles by pill shape,"Transparent medicine bottles, pills, sorting bins","The robot sorts medicine bottles by pill shape. For each bottle, it holds the bottle in a position where the overhead camera can clearly see it, then places the bottle into the appropriate bin. The sorting is a blind start (the robot does not know the categories or the number of categories, building them up as it goes along)","- The type of bottle: vary size and material (all must be transparent)
+- The type of pill — at least 7 different types
+- The distribution of bottles in each run
+- The number of pills in each bottle","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires overhead camera positioning; blind-start sorting with visual inspection step,2,,,"Complexity, Dexterity"
+Home,Sort slippers into bins by color/type,"Slippers, large source bin, small sorting bins",Sort slippers by color/type from a large bin into a few smaller bins,"- The brand, colors, etc. of the slippers
+- The mix of slippers in the bin","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Deformable/soft objects; sorting by visual attribute (color/type),2,,,Complexity
+Home - kitchen,Decant liquids,"Pitcher, cup, soup pot, bowl","Pour liquids from one vessel to another without spilling (pitcher to cup, soup from pot to bowl)","- Vessel shape and size
+- Liquid viscosity (water, soup, juice)
+- Pouring height and angle","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Focus on precision pouring and spill prevention,1,,,Liquids
+Home - kitchen,Organize dishwasher / dish rack,"Dishes, plates, cups, cookware",Take washed dishes from sink and place them neatly in a dish rack to dry. Vary dishes/cups and organization,"- The type/number/color of each dish
+- Introduce other cookware (mugs, pots, pans)
+- Rack configuration","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires spatial reasoning for optimal rack usage,4,,,Complexity
+Home - kitchen,Make a continental breakfast,"Bread, toaster, coffee maker, pot, eggs, utensils",Make toast + brew coffee + boil water,"- Breakfast components (toast type, coffee vs tea)
+- Number of servings
+- Appliance configuration","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Involves coordination across multiple appliances,1,,,"Liquids, Perishables, Complexity"
+Home - kitchen,Assemble and mix salad,"Vegetables, bowl, utensils, salad dressing",Prepare a salad end-to-end. Salad type and substances can vary.,"- Salad ingredients and type
+- Dressing type
+- Bowl size and mixing method","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",End-to-end food prep task,2,,,"Complexity, Perishables"
+Home - kitchen,Cook instant food,"Portable stove, pot, ramen/mac & cheese, utensils","Prepare a meal with a portable stove (i.e. ramen, macaroni and cheese, one-pot rice)","- Food type (ramen, mac & cheese, rice)
+- Stove type
+- Number of steps involved","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires stove operation and timing,5,,,"Complexity, Perishables"
+Home - kitchen,Prepare plate or bowl of food,"Cooked food items, plates, bowls, spoons, utensils",Prepare lunch or dinner plate/tray/bowl with already cooked foods of different textures. Use spoons/utensils to transport,"- Food texture (soft, chunky, liquid)
+- Plate vs bowl vs tray
+- Portion size","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Focus on plating and portioning,4,,,Perishables
+Home - kitchen,Wipe counter,"Cloth, sponge, spray bottle, cleaning solution","Wipe counter, either to clean a spill or to remove dust. Vary types of cloth, surface, liquids, etc.","- Cloth/sponge type
+- Surface material (tile, wood, laminate)
+- Liquid type (water, cleaner)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Covers both reactive (spill) and proactive (dust) cleaning,2,,,Liquids
+Home - kitchen,Pluck fruit / vegetable,"Cherry tomatoes, berries, mandarins, basil, herbs","Fruit/produce handling: pluck cherry tomatoes, separate berries, peel mandarins, pick basil from herbs","- Produce type (small vs large)
+- Stem attachment difficulty
+- Container or vine configuration","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",High dexterity required; delicate produce,3,,,"Dexterity, Perishables"
+Home - kitchen,Set the table,"Plates, utensils, napkins, cups, bins","Take plates, utensils, napkins from bins and neatly set the table","- Number of place settings
+- Table layout
+- Utensil types (chopsticks, forks, spoons)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Anchor task for home kitchen; precise placement required,4,,,Anchor task
+Home - kitchen,Peel and slice a banana,"Banana, plastic knife, plate","Peel a banana, then set it down and slice it with a plastic knife","- Fruit type (banana, kiwi, mango)
+- Knife type
+- Slice thickness","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Entry-level cutting task with soft produce and safe utensil,1,,,"Dexterity, Sharp objects (safety)"
+Home - kitchen,Separate vegetables for cooking prep,"Broccoli, cauliflower, lettuce, cabbage","Separate broccoli/cauliflower from crown, lettuce/cabbage leaves from each other","- Vegetable type
+- Separation method (pull, snap, cut)
+- Size of portions","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires controlled force to break apart without damaging,3,,,"Dexterity, Perishables"
+Home - kitchen,Cut fruits or vegetables,"Fruits, vegetables, knife, cutting board",Proposal to vary to softer objects if fruits/vegetables are difficult,"- Produce hardness (soft vs firm)
+- Cut style (slice, dice, chop)
+- Knife type","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Sharp object safety is primary concern,4,,,"Sharp objects (safety), Perishables"
+Home - kitchen,"Cut pastries and other soft foods, then plate","Pastries, soft foods, knife, plate",Proposal to vary to softer objects if fruits/vegetables are difficult,"- Food type (croissant, cake, bread)
+- Portion size
+- Plating arrangement","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Updated cutting task with softer objects for safety (Jan 28 version),4,,,"Sharp objects (safety), Perishables"
+Home - kitchen,Measure substances for baking/cooking,"Measuring cups, measuring spoons, flour, sugar, salt, liquids",Vary substances and measurement sizes,"- Substance type (liquid, powder, granular)
+- Measurement unit (cups, tsp, tbsp)
+- Container shape","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Precision-focused task; critical for recipe accuracy,3,,,"Dexterity, Perishables"
+Home - kitchen,Tear and fold paper towel into smaller napkins,Paper towel roll,Tear paper towel from its roll and fold in varied ways,"- Fold pattern (quarters, triangles)
+- Number of sheets torn
+- Roll resistance","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests controlled tearing force and fine folding,3,,,Dexterity
+Home - kitchen,Sort foods in Ziploc bags and zip up,"Ziploc bags, chips, nuts, candy","Sort common foods (chips, nuts, candy) into plastic bags.","- Food type and size
+- Bag size
+- Filling level (partial vs full)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Deformable bag requires careful handling to zip properly,1,,,Deformables
+Home - kitchen,Sort assorted pastries by type,"Assorted donuts, pastries, basket, sorting containers","Sort assorted donuts (or other soft western pastries) from a basket by type into containers. The sorting is a blind start (the robot does not know the categories or the number of categories, building them up as it goes along)","- The type and appearance of each pastry
+- The mix of categories
+- The number of categories","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Blind-start sorting — robot discovers categories dynamically,5,,,"Perishables, Complexity"
+Home - kitchen,Sort fruits into containers,"Various fruits, basket, sorting trays/containers",The robot picks various fruits out of a basket and places them in a neat fashion into a tray,"- The type of fruit: apples, oranges, peaches, pears, grapes, kiwi, tangerines, bell peppers
+- The type of container: vary size, number of items it can hold, color, material (transparent/plastic/metal)
+- The presence of distractors","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Wide range of fruit shapes and sizes; distractors can be included,5,,,"Dexterity, Perishables"
+Industrial,Sort fasteners,"Fasteners, screws, bolts, nuts, parts organizer",Robot takes fasteners/small industrial parts from a mixed bin and sorts them into labeled compartments. Parts are unlabeled; requires visual recognition,"- Fastener types (screws, bolts, nuts, washers)
+- Organizer layout
+- Introducing mismatched parts","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Visual recognition only; labels on organizer must be read,2,,,Dexterity
+Industrial,Sort SMD components,"SMD component spools, labeled shelf",Robot places spools of electronic components into labeled positions on a shelf. Requires reading spool labels; spools look identical,"- Spool composition
+- Shelf label positions
+- Damaged/partial labels
+- Introducing mismatched spools","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Label-matching task; all spools look identical so reading is critical,5,,,Complexity
+Industrial,Repack electronic components,"Electronic components, shipping trays, packaging bags",Robot repackages bulk electronic components from shipping trays into packages of correct quantity to fulfill customer orders. Package type varies with tray quantity and order size,"- Component type and tray count
+- Order size
+- Sequence of orders (changes part allocation)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Complex reasoning task requiring number understanding and efficient part allocation,5,,,Complexity
+Industrial,Height gauge,"Height gauge, components, measurement platform",Use a height gauge to measure component dimensions and verify against tolerance specifications,"- Component types and sizes
+- Measurement tolerances
+- Pass/fail thresholds","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Trajectory
+Environmental distractors
+Active distractors",Precision-critical task with tight tolerances,5,,,Complexity
+Industrial,18650 battery QA,"18650 batteries, inspection equipment, bins","Perform quality assurance inspection on 18650 batteries, checking for defects and sorting accordingly","- Battery condition (normal, dented, corroded)
+- Defect types
+- Pass/fail sort bins","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires visual inspection and categorization,5,,,"Complexity, Dexterity"
+Industrial,Insert/rotate peg and hammer in hole,"Peg, hole fixture, hammer","Insert a peg into a hole, rotate to align, then use a hammer to drive it in","- Peg and hole size
+- Insertion angle
+- Force required","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests precise force application and alignment,2,,,"Dexterity, Force"
+Industrial,Fasten screw with screwdriver/tool,"Screws, screwdriver, hex key, fixture",Fasten screws into a fixture using a screwdriver or appropriate tool,"- Screw types (Phillips, flat, hex)
+- Torque requirement
+- Access angle","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests tool use and torque control,1,,,"Dexterity, Force"
+Industrial,Fasten screw with wrench or hex key,"Screws, wrench, hex key, fixture",Fasten screws into a fixture using a wrench or hex key,"- Screw/bolt types
+- Wrench size
+- Access constraints","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Updated version using wrench/hex key (Jan 28); tests controlled torque,1,,,"Dexterity, Force"
+Industrial,Lab pick and place,"Lab components, containers, trays",Pick and place lab components into precise positions in containers or trays in a laboratory setting,"- Component types
+- Tray/container configuration
+- Placement precision requirement","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Anchor task for industrial/lab environment; high precision required,4,,,"Dexterity, Anchor task"
+Industrial,Cable harness,"Cables, connectors, harness fixture",Assemble and route cables into a cable harness configuration,"- Cable types and sizes
+- Connector types
+- Harness complexity","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",High dexterity required for cable routing and connector insertion,5,,,Dexterity
+Logistics,Scan barcode on boxes,"Boxes, countertop barcode scanner",The robot takes items from a bin or basket and scans the barcodes on them with a countertop barcode scanner,"- Box size and shape
+- Barcode placement (top, side, bottom)
+- Scanner type","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Trajectory
+Environmental distractors
+Active distractors",Requires the robot to examine each object to find the barcode,1,,,Complexity
+Logistics,Pack box tightly,"Cardboard box, items, packing material",Pack items tightly into a box to maximize space efficiency,"- Box size
+- Item types and fragility
+- Packing material (bubble wrap, foam, crinkle)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Efficient packing requires spatial reasoning,3,,,"Force, Deformables"
+Logistics,Seal box and add packing stickers,"Box, packing tape, stickers, label printer",Seal a packed box with tape and apply shipping/packing stickers,"- Box size
+- Tape type
+- Sticker type and placement location","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires even tape application and sticker placement,3,,,"Force, Dexterity, Deformables"
+Logistics,Pack box tightly and seal — add packing stickers,"Box, items, packing tape, stickers",Pack box tightly and seal. Add packing stickers,"- Box size
+- Item types
+- Sticker/label type","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Combined packing and sealing task (Jan 27 version),3,,,"Force, Deformables"
+Logistics,Unpack and breakdown box,"Cardboard box, contents",Unpack contents from a box and break down/flatten the cardboard,"- Box size and tape type
+- Content types inside
+- Breakdown method (fold, cut)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests controlled force for tape removal and cardboard folding,3,,,Force
+Logistics,Insert smaller items into polybags,"Polybags, small items",Insert smaller items into plastic polybags for packaging,"- Item size and shape
+- Bag size
+- Number of items per bag","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Deformable bag requires careful opening and insertion,2,,,"Deformables, Dexterity"
+Logistics,Wrap delicate items with protecting wrap,"Fragile items, bubble wrap, foam padding",Wrap delicate or fragile items with protective material for safe shipping,"- Item shape and fragility
+- Wrap material (bubble, foam, paper)
+- Coverage pattern","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires gentle handling and thorough coverage,4,,,"Deformables, Dexterity"
+Logistics,Counting scale,"Items, counting scale, containers",Use a counting scale to measure and verify item quantities by weight,"- Item types and weight
+- Target count quantity
+- Scale configuration","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Trajectory
+Environmental distractors
+Active distractors",Requires precise placement on scale and reading output,5,,,"Dexterity, Complexity"
+Logistics,Sort packaged food items into bins,"Packaged food items, source bin, target bins",Pick up various packaged food items from one bin and move them to another,"- The brand, colors, etc. of each individual item
+- The mix of items in the bin
+- The distribution of items in the target bin
+- The size and shape of the target bins (e.g. items moved to two smaller bins)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Focus on varied packaging shapes and sizes,2,,,Complexity
+Logistics,Pack first aid kits from supply bin,"Bandages, swabs, cleaning pads, source bin, first aid kits","Sort first aid supplies (bandages, swabs, cleaning pads, etc.) from a bin into first aid kits","- The brand, colors, etc. of each individual item
+- The composition of each kit
+- The size of the receiving container","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Mix of rigid and flexible/wrapped objects; kit composition varies,4,,,"Complexity, Dexterity"
+Misc,Open tasks,TBD,Open-ended tasks to be defined based on emerging demonstration needs,- To be determined,TBD,Placeholder for tasks not yet categorized into a specific scenario,,,,TBD
+Office,"Align/sort papers into neat piles, complete with clip or staple","Papers, paper clips, stapler, folders","Vary pile sizes, colors, clip/staple","- Pile size and number of sheets
+- Paper color/size
+- Clip vs staple","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Focus on alignment precision and fastening,1,,,Dexterity
+Office,Open and sort mail/folders,"Envelopes, mail, folders, letter opener",Vary size of paper/mail; opening mechanism. Aim to sort papers one by one,"- Envelope size and type
+- Opening mechanism (tear, letter opener)
+- Sort categories","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires careful handling to avoid tearing content,5,,,"Dexterity, Sharp objects (safety)"
+Office,Assemble a work station,"Laptop, monitor, power strip, cables, accessories","Robot assembles a working desk setup by connecting a laptop, monitor, power strip, and accessories. Focus on plugging in cables","- Cable types (USB-C, HDMI, power)
+- Peripheral types
+- Desk layout configuration","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires precise cable routing and connector alignment,5,,,"Force, Dexterity, Complexity"
+Office,Pick and place small office necessities into bins,"Rubber bands, paper clips, staples, thumbtacks, bins","Focus on rubber bands, paper clips, staples, thumbtacks","- Object types
+- Bin configuration and labeling
+- Object count per bin","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Small objects with varied shapes and grip challenges,4,,,Dexterity
+Office,Label folders/papers with identifiers,"Folders, papers, stickers, post-its, staples","Label folders/papers with identifiers (i.e. stickers, post-its, stapled-on papers)","- Label type (sticker, post-it, stapled paper)
+- Identifier content
+- Surface material","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires precise placement and adhesive handling,2,,,Deformables
+Office,Organize a very messy desk,"Mixed office items, bins, organizers","Reorganize and clean a cluttered desk surface into a tidy, functional workspace","- Desk item variety and clutter level
+- Target organization layout
+- Item categories","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Tests environmental awareness and spatial planning,3,,,Complexity
+Office,Water and care for an office plant,"Watering can, indoor plant, scissors","Water, trim, and care for an office plant","- Plant type and size
+- Watering volume
+- Trimming required (leaves, stems)","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Involves liquid handling and precision trimming,3,,,"Liquids, Complexity, Dexterity"
+Office,Return books to bookshelves,"Books, bookshelf",Return books to their correct labeled positions on a bookshelf,"- Book size and weight
+- Shelf height and depth
+- Labeling system","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Requires reading labels and matching to correct shelf positions,4,,,Complexity
+Office,Sort school supplies into piles,"Notebooks, pencils, pens, folders, binders, basket, piles","Sort assorted school stationery (notebooks, pencils, pens, folders, binder) from a basket into neat piles with one (or some other pre-determined number) of each item per pile","- The brand, colors, etc. of each individual item
+- The mix of items in the basket
+- The mix of items in each pile","Work surface
+Backgrounds
+Starting/Receiving containers
+Lighting
+Handedness
+Trajectory
+Environmental distractors
+Active distractors",Wide variety of object types and sizes; piling requires neatness,4,,,"Complexity, Dexterity"

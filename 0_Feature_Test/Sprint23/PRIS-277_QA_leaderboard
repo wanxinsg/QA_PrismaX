@@ -1,0 +1,190 @@
+# PRIS-277 QA Leaderboard 测试分析与 E2E 测试
+
+## 1. 分析范围与代码基线
+
+- 前端：`app-prismax-rp`，`testing` 分支，当前提交 `db68dba`。
+- 后端：`app-prismax-rp-backend`，`testing` 分支，当前提交 `e2129bf`。
+- 页面入口：`/data/review/progress`，页面导航名称为 **My Progress**。
+- 前端核心实现：`src/components/Data/ReviewHome/ReviewUserProgress.js`。
+- 后端核心实现：`app_prismax_data_pipeline/app.py` 中 QA Leaderboard、Progress Stats 接口。
+- 排名常量：`app_prismax_data_pipeline/qa_helper.py` 中 `QA_EPISODE_REVIEW_TRANSACTION_TYPE = data_qa_episode_review`。
+- 本文仅依据上述当前代码分析，未参考其他 Markdown 文档。
+
+## 2. 系统逻辑分析
+
+### 2.1 页面访问与加载
+
+- 前端只允许“已登录且角色不是 operator”的用户进入 Review Workspace；未登录用户和 operator 看到无权限占位页。
+- `My Progress` 页面加载时并行请求：
+  - `GET /data/qa/leaderboard?userId=<当前用户ID>`：榜单及当前用户信息，不携带 Authorization。
+  - `GET /data/qa/progress-stats`：个人积分、审核数、通过率、本周积分、排名等，携带 Bearer Token。
+  - `GET /data/qa/progress-history?page=1&page_size=5`：审核历史，携带 Bearer Token。
+- Leaderboard GET 本身没有登录或角色校验；即使不传 Token，也可以读取榜单并通过任意 `userId`/`user_id` 查询 `you`。
+
+### 2.2 榜单生成
+
+- `POST /data/qa/leaderboard/update` 负责重建缓存表 `data_qa_leaderboard`，只接受与 `INTERNAL_API_TOKEN` 完全相同的 Bearer Token。
+- 更新在一个数据库事务中执行：
+  1. 创建 rank 索引（如果不存在）。
+  2. 清空缓存表。
+  3. 从 QA session、积分流水和 users 表重新聚合并写入。
+- 进入缓存榜单的基础条件是：用户在 `data_qa_sessions` 中至少存在一条记录，并且 users 表中存在对应用户。
+- `uploads_reviewed` 为 `COUNT(DISTINCT upload_id)`，同一用户对同一 upload 的重复 session 只计一次。
+- `total_points` 只汇总 `point_transactions.transaction_type = data_qa_episode_review` 的 `points_change`；没有该类型流水时按 0 处理。
+- QA 积分在 upload 形成最终决策时发放：审核者的 gate 结果需与最终 gate 一致，且 QA score 与最终分数差值不超过 8；每个符合条件的 sampled episode 发放 100 Prisma。
+- 同一 `(user_id, episode_id)` 已关联积分流水时不会重复奖励；Leaderboard 以 `point_transactions` 为准，不直接读取 `users.total_points`。
+- 榜单聚合没有开始日期或其他时间范围过滤，`QA_LAUNCH_DATE` 不参与排名，因此当前名次是代码可读取数据的全历史排名。
+- 当前代码没有按 `user_role` 过滤，因此普通非 operator 会员只要产生过 QA session，也会进入榜单；这与前端列名 **Validator** 可能存在语义偏差。
+
+### 2.3 排名规则
+
+排名使用 `ROW_NUMBER()`，排序优先级依次为：
+
+1. `total_points` 降序；
+2. `uploads_reviewed` 降序；
+3. `user_id` 升序。
+
+因此：
+
+- 相同积分不会并列；
+- 相同积分时审核 upload 更多者在前；
+- 积分和审核数都相同时，user ID 较小者在前；
+- 名次始终是连续的 1、2、3……。
+
+### 2.4 榜单读取与当前用户回填
+
+- GET 接口按 rank 升序最多返回前 125 名。
+- 传入 `userId` 或 `user_id` 时，接口同时返回 `you`：
+  - 用户已在缓存表：直接读取缓存名次。
+  - 用户不在缓存表但有 QA session：实时重新计算其积分、审核数及全量排名。
+  - 用户从未审核但 users 表存在：返回积分（可能为 0 或已有 QA 类型流水），`rank = null`、`uploads_reviewed = null`。
+  - 用户不存在：`you = null`。
+- 前端若发现当前用户已在前 125 名，只高亮该行；如果不在前 125 名，则把 `you` 追加在榜单末尾。
+- 个人卡片中的 `Your rank` 来自 `/progress-stats`，该接口只查询缓存表；而追加行可能来自实时回填，所以缓存未刷新时两处排名可能不一致。
+
+### 2.5 身份、会员与 UI 展示
+
+- 身份展示优先使用 email；email 为空时按 Ethereum、Solana、Base、Monad、Aptos 地址的顺序选择第一个非空钱包。
+- 标识长度大于 7 时显示为“前 4 位 + `..` + 后 3 位”；长度不超过 7 时原样返回。
+- 有 email 时不会返回钱包地址。
+- 会员图标仅精确识别 `Innovator Member`、`Amplifier Member`、`Explorer Member`；其他值或空值显示默认图标。
+- 第 1、2、3 名分别显示金、银、铜图标；第 3 名后显示分隔线，其余显示数字名次。
+- 列为 Rank、Validator、Uploads、Prisma；当前用户行使用绿色高亮。
+- 加载中显示 8 行骨架；空数据、请求失败分别显示独立提示。
+- 宽度不超过 900px 时左右卡片改为上下布局；不超过 480px 时榜单列宽收窄。
+
+## 3. API 契约摘要
+
+- `POST /data/qa/leaderboard/update`
+  - Header：`Authorization: Bearer <INTERNAL_API_TOKEN>`
+  - 成功：HTTP 200，`{"status":"ok","updated":<行数>}`
+  - Token 错误或缺失：HTTP 401
+  - 数据库异常：HTTP 500
+- `GET /data/qa/leaderboard`
+  - Query：可选 `userId` 或 `user_id`
+  - 成功：HTTP 200，`success=true`，`leaderboard` 数组，`you` 为对象或 null
+  - 榜单项：`user_id`、`total_points`、`rank`、`uploads_reviewed`、`email`、`wallet_address`、`user_class`
+  - 数据库异常：HTTP 500，`success=false`
+- `GET /data/qa/progress-stats`
+  - Header：有效用户 Bearer Token
+  - rank 来自缓存榜单；缺少 Token、Token 无效、operator 分别返回 400、401、403。
+
+## 4. 测试数据建议
+
+- A：QA 积分 1,000，10 个不同 upload，长 email，Innovator。
+- B：QA 积分 1,000，8 个不同 upload，长钱包地址，Amplifier。
+- C：QA 积分 1,000，10 个不同 upload，user ID 大于 A，Explorer。
+- D：2 个不同 upload，无 QA 积分流水。
+- E：有 300 QA 积分和 900 非 QA 类型积分。
+- F：同一 upload 存在多条 QA session。
+- G：有用户记录但从未审核。
+- H：有 QA session，但 user_role 不是 QA 且不是 operator。
+- I：排名第 126 名及以后。
+- J：users 表不存在、但存在孤立 QA session 的异常数据。
+- K：同一 upload 中包含 gate/score 匹配、gate 不匹配、分差等于 8、分差大于 8 的审核者。
+
+## 5. 统一 E2E 测试条目
+
+说明：所有条目统一收录于下表；“当前实现风险”表示测试预期用于暴露代码现状与潜在产品/安全要求的差异。
+
+| ID | 优先级 | 类型 | 测试场景 | 前置条件/数据 | 操作步骤 | 预期结果 |
+|---|---|---|---|---|---|---|
+| LB-E2E-001 | P0 | 页面/权限 | 已登录非 operator 进入 My Progress | 有效普通会员或 QA 用户 | 登录后进入 Data → Review → My Progress | 成功进入 `/data/review/progress`；展示个人卡片、Leaderboard、Review history |
+| LB-E2E-002 | P0 | 页面/权限 | 未登录访问 My Progress | 清除 gateway token | 直接访问 `/data/review/progress` | 显示“Please log in…”无权限页；不展示榜单组件 |
+| LB-E2E-003 | P0 | 页面/权限 | operator 访问 My Progress | operator 账号 | 登录并直接访问进度页 | 显示“This area is not available to Operators.”；不展示榜单组件 |
+| LB-E2E-004 | P1 | 页面/权限 | 非 QA 会员访问 | 非 operator、非 QA 的有效会员 | 登录并进入 My Progress | 当前前端允许访问；个人接口也允许访问；`is_validator=false`，不显示 Validator 徽章 |
+| LB-E2E-005 | P0 | API/基础 | 获取无当前用户参数的榜单 | 已生成缓存榜单 | 调用 `GET /data/qa/leaderboard` | HTTP 200；`success=true`；返回最多 125 条；`you=null` |
+| LB-E2E-006 | P0 | 排名 | 积分优先排序 | A=1000 分，D=0 分 | 刷新榜单后调用 GET | A 排在 D 前；`total_points` 与 QA 类型积分汇总一致 |
+| LB-E2E-007 | P0 | 排名 | 同积分按不同 upload 数排序 | A=1000/10，B=1000/8 | 刷新并读取榜单 | A 排在 B 前 |
+| LB-E2E-008 | P0 | 排名 | 积分、upload 数相同按 user ID 排序 | A 与 C 均为 1000/10，A ID 更小 | 刷新并读取榜单 | A 排在 C 前；两人名次不同且连续，不产生并列名次 |
+| LB-E2E-009 | P0 | 聚合 | 同一 upload 的重复 session 去重 | F 对同一 upload 有多条 session | 刷新并读取 F | `uploads_reviewed=1`，不会按 session 条数累计 |
+| LB-E2E-010 | P0 | 聚合 | 不同 upload 正确累计 | A 有 10 个不同 upload | 刷新并读取 A | `uploads_reviewed=10` |
+| LB-E2E-011 | P0 | 聚合 | 只累计 QA 类型积分 | E 有 300 QA 积分、900 其他类型积分 | 刷新并读取 E | `total_points=300`，其他 transaction type 不计入 |
+| LB-E2E-012 | P1 | 聚合 | 多笔正负 QA 积分调整 | 用户有 +500、-100、+50 QA 流水 | 刷新并读取用户 | `total_points=450`；按最终汇总值参与排序 |
+| LB-E2E-013 | P1 | 聚合 | 有审核但无 QA 积分流水 | D 有 session，无匹配积分流水 | 刷新并读取 D | 用户进入榜单；`total_points=0` |
+| LB-E2E-014 | P0 | 范围 | 无任何 QA session 的用户不进入缓存榜单 | G 从未审核 | 刷新并读取榜单 | G 不在 `leaderboard` 数组中 |
+| LB-E2E-015 | P1 | 数据完整性 | QA session 对应 users 记录不存在 | 异常数据 J | 刷新榜单 | J 被 users 内连接排除；更新接口不因该记录失败 |
+| LB-E2E-016 | P0 | 范围/风险 | 非 QA 用户有 QA session | H 有 session 和积分 | 刷新榜单 | 当前实现中 H 会进入榜单；记录“Validator”列包含非 Validator 的需求风险 |
+| LB-E2E-017 | P0 | 上限 | 榜单只返回前 125 名 | 准备至少 130 位有 session 的用户 | 刷新后调用 GET | `leaderboard.length=125`；按 rank 1～125 返回 |
+| LB-E2E-018 | P0 | 当前用户 | 当前用户位于前 125 名 | userId=A | 页面请求榜单 | `you` 返回 A；A 仅出现一次且对应行高亮，不在末尾重复追加 |
+| LB-E2E-019 | P0 | 当前用户 | 当前用户排名第 126 名以后 | userId=I | 页面请求榜单 | 前 125 名照常显示；I 作为 `you` 追加到末尾并高亮，显示其真实 rank |
+| LB-E2E-020 | P0 | 当前用户 | 同时支持 camelCase 参数 | 已知榜单用户 A | 分别请求 `?userId=A`、`?user_id=A` | 两次 `you` 内容一致 |
+| LB-E2E-021 | P1 | 当前用户 | 两种 user ID 参数同时传入 | `user_id=A&userId=B` | 调用 GET | 当前实现优先使用 `user_id`，`you` 返回 A |
+| LB-E2E-022 | P0 | 实时回填 | 用户不在缓存但已有 QA session | 刷新后再为新用户创建 session/积分 | 不再次刷新，带新用户 ID 调用 GET | `leaderboard` 仍为旧缓存；`you` 通过实时计算返回最新积分、审核数和实时 rank |
+| LB-E2E-023 | P0 | 零审核 | 当前用户从未审核 | userId=G | 调用 GET 并进入页面 | `you.rank=null`、`uploads_reviewed=null`；追加行显示 rank/uploads 为 `—`，Prisma 显示积分或 0 |
+| LB-E2E-024 | P1 | 当前用户 | 查询不存在的用户 | 随机不存在 userId | 调用 GET | HTTP 200；`you=null`；页面不追加当前用户行 |
+| LB-E2E-025 | P0 | 一致性 | 缓存内个人排名与榜单一致 | A 已在缓存 | 对比 leaderboard、`you`、progress-stats | 三处 rank 一致；A 的积分和审核数一致 |
+| LB-E2E-026 | P0 | 一致性/风险 | 缓存过期时个人卡片与实时回填差异 | 用户在刷新后首次产生 session | 访问 My Progress | 当前实现可能出现个人卡片 `Your rank=—`，追加行却有实时 rank；记录缓存一致性风险 |
+| LB-E2E-027 | P0 | 刷新 | 刷新后消除缓存差异 | 承接 LB-E2E-026 | 调用合法 update，再刷新页面 | 新用户进入缓存；个人卡片、榜单与 `you` 排名一致 |
+| LB-E2E-028 | P0 | 身份 | email 优先于钱包 | A 同时有 email 和多个钱包 | 刷新并读取 A | 仅 `email` 有值；`wallet_address=null`；页面显示脱敏 email |
+| LB-E2E-029 | P0 | 身份 | email 为空时钱包优先级 | 用户同时有 Ethereum、Solana、Base、Monad、Aptos 地址 | 刷新并读取用户 | 选择 Ethereum；移除后依次选择 Solana、Base、Monad、Aptos |
+| LB-E2E-030 | P0 | 隐私 | 长标识脱敏 | email/钱包长度大于 7 | 获取榜单和 `you` | 返回并显示前 4 位、`..`、后 3 位；接口不返回完整标识 |
+| LB-E2E-031 | P0 | 隐私/风险 | 短标识脱敏边界 | 标识长度等于 7 和 8 | 获取榜单 | 长度 7 原样返回；长度 8 被截断；确认短 email/标识明文暴露是否符合隐私要求 |
+| LB-E2E-032 | P0 | 安全/风险 | 未认证读取榜单 | 不提供 Token | 调用 GET | 当前实现返回 HTTP 200 和榜单；确认公开读取是否为产品预期 |
+| LB-E2E-033 | P0 | 安全/风险 | 未认证枚举任意用户 `you` | 不提供 Token，遍历有效 userId | 调用 GET | 当前实现可返回对应脱敏身份、会员、积分和排名；记录用户枚举/越权读取风险 |
+| LB-E2E-034 | P0 | 安全 | userId 注入与异常字符 | 传 SQL 片段、超长字符串、Unicode | 调用 GET | SQL 使用绑定参数，不执行注入；接口不泄露 SQL/堆栈；服务保持可用 |
+| LB-E2E-035 | P0 | 更新鉴权 | update 缺少或使用错误 Token | 无 Token、错误 Token、空 Bearer | 分别调用 POST update | 均返回 HTTP 401；缓存数据不变 |
+| LB-E2E-036 | P0 | 更新鉴权 | update 使用合法内部 Token | 正确配置 `INTERNAL_API_TOKEN` | 调用 POST update | HTTP 200；`status=ok`；`updated` 等于缓存表行数 |
+| LB-E2E-037 | P0 | 配置安全 | 生产环境未配置内部 Token | 临时移除环境变量 | 启动隔离环境并尝试代码默认 Token | 当前代码存在内置默认值；应作为高风险配置缺陷记录，生产应强制显式配置且无默认秘密 |
+| LB-E2E-038 | P0 | 原子性 | 重建写入中途失败 | 注入 INSERT/查询异常 | 调用 update | HTTP 500；事务回滚，旧榜单不应因先执行 DELETE 而变为空 |
+| LB-E2E-039 | P1 | 幂等性 | 连续重复刷新 | 数据源不变 | 连续调用两次 update | 两次均成功；行数、排名和聚合值相同；无主键冲突 |
+| LB-E2E-040 | P1 | 并发 | 两个刷新请求并发执行 | 可并发调用 update | 同时发起两次 POST | 最终缓存无重复 user_id、无部分数据；若出现锁等待可恢复且至少一个完整事务成功 |
+| LB-E2E-041 | P1 | UI | 前三名奖牌与分隔线 | 至少 4 名用户 | 打开页面检查榜单 | 1/2/3 显示金/银/铜图标；第 3 名后显示分隔线；第 4 名显示数字 4 |
+| LB-E2E-042 | P1 | UI | 当前用户高亮 | 当前用户在榜内或追加行 | 打开页面 | 当前用户行使用绿色背景和边框；其他行不应用该样式 |
+| LB-E2E-043 | P1 | UI | 会员图标映射 | 三类标准会员及未知/空 class | 打开页面 | Innovator/Amplifier/Explorer 显示对应图标；未知或空 class 显示默认图标 |
+| LB-E2E-044 | P1 | UI | 数字和空值格式 | 大整数、null、非法数值响应 | 打开页面或 Mock 响应 | 积分/上传数使用英文千分位；null rank/uploads 显示 `—`；非法积分回退为 0 |
+| LB-E2E-045 | P1 | UI | 接口 rank 缺失时的前端回退 | Mock 某榜单项不含 rank | 打开页面 | 前端使用数组位置 `index+1`；前三项仍显示奖牌 |
+| LB-E2E-046 | P1 | 状态 | 榜单加载态 | 延迟 GET 响应 | 打开页面 | 请求期间显示 8 行骨架；响应后骨架消失并显示数据 |
+| LB-E2E-047 | P1 | 状态 | 空榜单 | Mock `leaderboard=[]`、`you=null` | 打开页面 | 显示“No leaderboard data yet.”；无空白异常或报错 |
+| LB-E2E-048 | P0 | 状态 | 榜单接口 500/网络失败 | Mock 500、断网、超时失败 | 打开页面 | 显示“Failed to load the leaderboard.”；个人 stats/history 的独立请求不应被阻断 |
+| LB-E2E-049 | P1 | 健壮性 | 榜单字段不是数组 | Mock `leaderboard=null`、对象或字段缺失 | 打开页面 | 前端转为空数组并显示空榜提示；页面不崩溃 |
+| LB-E2E-050 | P1 | 健壮性 | 单条记录字段缺失 | Mock 缺 email、钱包、class、uploads、points | 打开页面 | 身份显示 `—`，默认会员图标生效，上传为 `—`，积分为 0；页面不崩溃 |
+| LB-E2E-051 | P1 | 响应式 | 平板布局 | 视口 900px 及以下 | 打开 My Progress | Leaderboard 与 Review history 从左右两列切换为上下单列；无横向页面溢出 |
+| LB-E2E-052 | P1 | 响应式 | 手机榜单布局 | 视口 480px 及以下 | 打开页面并滚动榜单 | 列宽收窄、名称省略显示，Rank/Uploads/Prisma 仍可辨认；榜单区域可纵向滚动 |
+| LB-E2E-053 | P2 | 可访问性 | 奖牌、会员图标和键盘浏览 | 正常榜单数据 | 使用读屏结构检查及键盘导航 | 奖牌 alt 为 `Rank N`，会员图标有 alt；页面无键盘陷阱；文本对比度需通过产品标准 |
+| LB-E2E-054 | P1 | 性能 | 125 条榜单渲染与滚动 | 缓存至少 125 条 | 打开页面、连续滚动 | 请求与渲染时间满足项目 SLA；滚动无明显卡顿；只渲染接口返回的 125 条及最多 1 条追加用户 |
+| LB-E2E-055 | P1 | 部署完整性 | 缓存表/索引缺失 | 新建空数据库或缺少迁移 | 启动服务并调用 GET/update | 验证部署已创建 `data_qa_leaderboard` 表及必需约束；当前 update 只创建 rank 索引，不负责建表，缺表时应明确暴露部署阻断 |
+| LB-E2E-056 | P0 | 积分全链路 | 最终决策命中后按 episode 发放积分 | K 中 gate 与最终 gate 一致、score 分差小于或等于 8，包含 N 个 sampled episodes | 完成最终 QA 决策，刷新榜单并读取该用户 | 新增 N 条 `data_qa_episode_review` 流水；每条 100 Prisma；榜单 `total_points` 增加 `N×100`，排名按新积分更新 |
+| LB-E2E-057 | P0 | 积分边界 | gate 不匹配或 score 分差超限不奖励 | K 中分别准备 gate 不一致、score 分差=8、score 分差=9 的审核 | 完成最终决策并刷新榜单 | gate 不一致和分差 9 不新增积分；分差 8 可获得积分 |
+| LB-E2E-058 | P0 | 积分幂等 | 相同最终决策重复执行不重复发奖 | 已为同一 user/episode 生成并关联积分流水 | 重放最终决策逻辑，再刷新榜单 | 已奖励 `(user_id, episode_id)` 不产生第二笔积分；榜单总积分不重复增加 |
+| LB-E2E-059 | P1 | 时间范围 | 排名使用全历史数据 | 准备 QA 上线日期前后或较早/较新的 session 与 QA 积分 | 刷新榜单并核对聚合值 | 所有可读取历史 session 和 QA 类型积分均计入；排名不受 `QA_LAUNCH_DATE` 或近 7 天窗口限制 |
+
+## 6. 重点风险与验收决策
+
+1. **公开读取与用户枚举**：Leaderboard GET 无认证，且允许任意 `userId` 查询 `you`。需要产品和安全确认是否允许。
+2. **内置内部 Token 默认值**：环境变量缺失时使用代码默认值，不适合作为生产安全边界。
+3. **Validator 语义不一致**：缓存生成未限制 QA 角色，但 UI 列名为 Validator。
+4. **无并列排名**：实现明确使用 `ROW_NUMBER`。若产品期望同分并列，应改为 `RANK` 或 `DENSE_RANK`，并重新定义后续名次。
+5. **缓存新鲜度不明确**：当前代码只提供更新 endpoint，仓库内未发现调用方；需要确认部署环境调度频率、失败告警和重试机制。
+6. **个人名次可能不一致**：`you` 有实时 fallback，而 `progress-stats.rank` 只读缓存。
+7. **短标识未脱敏**：长度不超过 7 的 email/钱包会完整返回。
+8. **数据库建表依赖**：当前代码会创建 rank 索引，但不会创建榜单表；需要确认迁移已包含该表、主键和 `updated_at` 字段。
+9. **积分数据源差异**：Leaderboard 汇总积分流水，而不是 `users.total_points`；两者一旦因补数或失败出现偏差，榜单以流水结果为准。
+
+## 7. 建议验收准入条件
+
+- P0 用例全部通过；所有“当前实现风险”均得到产品/安全书面结论。
+- 明确榜单是否仅限 QA 角色、是否允许公开访问、是否允许同分不并列。
+- 确认定时刷新任务、刷新频率、失败重试和监控告警。
+- 验证生产环境必须显式配置内部 Token，且代码中不保留可用默认值。
+- 验证缓存榜单、实时 `you`、个人 `Your rank` 在刷新后的最终一致性。
