@@ -28,19 +28,21 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-# 默认与 Prismax 主仓并列的五个 repo 目录名（PROJECT_ROOT 下）
+# 默认与 Prismax 主仓并列的 repo 目录名（PROJECT_ROOT 下）
 REPOSITORIES = [
     "app-prismax-rp",
     "app-prismax-rp-backend",
     "gateway-prismax-rp",
     "roarm-m3-web",
     "prismax-python",
+    "prismax-marketing-rp",
 ]
 
 # 分支策略：默认 testing，个别仓库可覆盖
 DEFAULT_TARGET_BRANCH = "testing"
 REPO_TARGET_BRANCHES = {
     "prismax-python": "main",
+    "prismax-marketing-rp": "main",
 }
 
 
@@ -106,7 +108,7 @@ def run_git_command(
 
 
 def pull_testing_branch(repo_name: str, repo_path: Path) -> GitPullResult:
-    """按仓库策略拉取指定分支（默认 testing，prismax-python 为 main）"""
+    """按仓库策略拉取指定分支（默认 testing，prismax-python / prismax-marketing-rp 为 main）"""
     result = GitPullResult(repo_name, str(repo_path))
     target_branch = REPO_TARGET_BRANCHES.get(repo_name, DEFAULT_TARGET_BRANCH)
     
@@ -261,7 +263,7 @@ def send_email_report(results: List[GitPullResult]):
             <div class="summary">
                 <p><strong>执行时间:</strong> {now}</p>
                 <p><strong>总计:</strong> {len(results)} 个仓库</p>
-                <p><strong>分支策略:</strong> 默认 testing，prismax-python 使用 main</p>
+                <p><strong>分支策略:</strong> 默认 testing，prismax-python / prismax-marketing-rp 使用 main</p>
                 <p><strong>成功:</strong> <span style="color: #27ae60;">{sum(1 for r in results if r.success)}</span></p>
                 <p><strong>失败:</strong> <span style="color: #e74c3c;">{sum(1 for r in results if not r.success)}</span></p>
             </div>

@@ -1,14 +1,11 @@
 #!/bin/bash
 #
-# 安装 Daily Work 的 launchd 任务（工作日 9:30 + RunAtLoad 在 9:25–9:45 窗口内补跑）
+# 安装 Daily Pull 的 launchd 任务（每天 9:00 主任务 + 每 30 分钟补跑检查）
 #
 # 用法: ./setup_launchd.sh
 #
-# 安装后会：
-#   - 每周一至周五 9:30 若已登录则尝试执行
-#   - 用户登录时（RunAtLoad）若处于 9:25–9:45 且当天尚未执行则补跑一次
-#   - 同一天内最多执行一次（由 run_daily_pull_once.sh 保证）
-#   - 周末不执行（run_daily_pull_once.sh 内 date +%u 判断）
+# plist 模板使用 __DAILY_PULL_DIR__ 占位符。安装时会替换成脚本当前目录，
+# 因此移动 Daily_Pull 后重新运行本脚本即可更新所有 launchd 路径。
 #
 # 建议：安装本 launchd 后，从 crontab 中移除旧的 Daily Pull 任务，避免重复执行。
 #
@@ -16,39 +13,53 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLIST_NAME="com.prismax.daily_pull.plist"
-SRC_PLIST="${SCRIPT_DIR}/${PLIST_NAME}"
 LAUNCH_AGENTS="${HOME}/Library/LaunchAgents"
-DST_PLIST="${LAUNCH_AGENTS}/${PLIST_NAME}"
+DOMAIN="gui/$(id -u)"
 
-# 检查 wrapper 和 plist 是否存在
-[[ -f "${SCRIPT_DIR}/run_daily_pull_once.sh" ]] || { echo "错误: 找不到 run_daily_pull_once.sh"; exit 1; }
-[[ -f "$SRC_PLIST" ]] || { echo "错误: 找不到 $PLIST_NAME"; exit 1; }
+PLIST_SPECS=(
+    "com.prismax.daily_pull.plist|com.prismax.gitpull.daily.plist|com.prismax.gitpull.daily"
+    "com.prismax.gitpull.catchup.plist|com.prismax.gitpull.catchup.plist|com.prismax.gitpull.catchup"
+)
 
-mkdir -p "$LAUNCH_AGENTS"
+# 检查执行脚本
+[[ -x "${SCRIPT_DIR}/pull_repos.sh" ]] || { echo "错误: pull_repos.sh 不存在或不可执行"; exit 1; }
+[[ -x "${SCRIPT_DIR}/run_pull_if_needed.sh" ]] || { echo "错误: run_pull_if_needed.sh 不存在或不可执行"; exit 1; }
 
-# 若已加载则先卸载
-if launchctl list 2>/dev/null | grep -q com.prismax.daily_pull; then
-    echo "正在卸载已有任务..."
-    launchctl unload "$DST_PLIST" 2>/dev/null || true
-fi
+mkdir -p "$LAUNCH_AGENTS" "${SCRIPT_DIR}/log"
 
-# 安装并加载
-cp "$SRC_PLIST" "$DST_PLIST"
-launchctl load "$DST_PLIST"
+# 清理早期安装脚本可能创建的错误文件名。
+LEGACY_PLIST="${LAUNCH_AGENTS}/com.prismax.daily_pull.plist"
+launchctl bootout "$DOMAIN" "$LEGACY_PLIST" 2>/dev/null || true
+rm -f "$LEGACY_PLIST"
 
-echo "✅ launchd 任务已安装并已加载"
+for spec in "${PLIST_SPECS[@]}"; do
+    IFS='|' read -r template_name installed_name label <<< "$spec"
+    src_plist="${SCRIPT_DIR}/${template_name}"
+    dst_plist="${LAUNCH_AGENTS}/${installed_name}"
+
+    [[ -f "$src_plist" ]] || { echo "错误: 找不到 $src_plist"; exit 1; }
+
+    # 先按 label 和旧 plist 路径卸载，保证目录移动后不会残留旧任务。
+    launchctl bootout "${DOMAIN}/${label}" 2>/dev/null || true
+    launchctl bootout "$DOMAIN" "$dst_plist" 2>/dev/null || true
+
+    # 使用当前脚本目录生成可安装的 plist；& 需要转义以安全用于 sed replacement。
+    escaped_dir=${SCRIPT_DIR//&/\\&}
+    sed "s|__DAILY_PULL_DIR__|${escaped_dir}|g" "$src_plist" > "$dst_plist"
+    plutil -lint "$dst_plist" >/dev/null
+    launchctl bootstrap "$DOMAIN" "$dst_plist"
+    echo "✅ 已安装并加载: $label"
+done
+
 echo ""
 echo "说明:"
-echo "  - 工作日（周一至周五）每天 9:30 触发"
-echo "  - 脚本仅在 9:25–9:45 内实际运行，且每天最多一次"
-echo "  - 日志: ${SCRIPT_DIR}/daily_pull.log"
-echo "  - launchd 自身输出: ${SCRIPT_DIR}/launchd_stdout.log, launchd_stderr.log"
-echo "  - LLM 依赖: pip install -r ${SCRIPT_DIR}/requirements-daily-work.txt"
+echo "  - 主任务每天 9:00 执行 pull_repos.sh"
+echo "  - 补跑任务登录时及每 30 分钟检查一次，当天邮件成功后不再重复"
+echo "  - 日志目录: ${SCRIPT_DIR}/log"
 echo "  - 密钥可放在 daily_pull_env.local.sh（已 .gitignore）"
 echo ""
 echo "常用命令:"
-echo "  查看状态: launchctl list | grep prismax"
-echo "  卸载:     launchctl unload $DST_PLIST"
-echo "  重新加载: launchctl unload $DST_PLIST && launchctl load $DST_PLIST"
+echo "  查看状态: launchctl print ${DOMAIN}/com.prismax.gitpull.daily"
+echo "  查看补跑: launchctl print ${DOMAIN}/com.prismax.gitpull.catchup"
+echo "  路径再次移动后: 重新运行 ${SCRIPT_DIR}/setup_launchd.sh"
 echo ""

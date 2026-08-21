@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Prismax Git Pull Automation Script (Kira-compatible mechanism)
-# - Pull multiple repos' target branch (default testing, prismax-python -> main)
+# - Pull multiple repos' target branch (default testing, prismax-python / prismax-marketing-rp -> main)
 # - Send unified HTML email report (same template/subject strategy as Kira)
 # - Stamp to avoid double-run in same day
 #
@@ -55,6 +55,7 @@ REPOS=(
     "gateway-prismax-rp"
     "roarm-m3-web"
     "prismax-python"
+    "prismax-marketing-rp"
 )
 
 DEFAULT_TARGET_BRANCH="testing"
@@ -90,7 +91,7 @@ log_message "=========================================="
 for repo in "${REPOS[@]}"; do
     REPO_PATH="$PRISMAX_ROOT/$repo"
     TARGET_BRANCH="$DEFAULT_TARGET_BRANCH"
-    if [ "$repo" = "prismax-python" ]; then
+    if [ "$repo" = "prismax-python" ] || [ "$repo" = "prismax-marketing-rp" ]; then
         TARGET_BRANCH="main"
     fi
 
@@ -241,7 +242,7 @@ EMAIL_BODY=$(cat << MAILBODY
         <div class="summary">
             <p><strong>执行时间:</strong> $NOW_STR</p>
             <p><strong>总计:</strong> ${#REPOS[@]} 个仓库</p>
-            <p><strong>分支策略:</strong> 默认 testing，prismax-python 使用 main</p>
+            <p><strong>分支策略:</strong> 默认 testing，prismax-python / prismax-marketing-rp 使用 main</p>
             <p><strong>成功:</strong> <span style="color: #27ae60;">$SUCCESS_COUNT</span></p>
             <p><strong>失败:</strong> <span style="color: #e74c3c;">$FAILURE_COUNT</span></p>
             <p><strong>跳过:</strong> <span style="color: #f39c12;">$SKIP_COUNT</span></p>

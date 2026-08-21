@@ -9,10 +9,10 @@
         <string>/bin/bash</string>
         <string>-l</string>
         <string>-c</string>
-        <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/pull_repos.sh</string>
+        <string>__DAILY_PULL_DIR__/pull_repos.sh</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull</string>
+    <string>__DAILY_PULL_DIR__</string>
     <!-- 每天 09:00 主触发 -->
     <key>StartCalendarInterval</key>
     <dict>
@@ -20,8 +20,8 @@
         <key>Minute</key><integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/log/daily_stdout.log</string>
+    <string>__DAILY_PULL_DIR__/log/daily_stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/wanxin/PycharmProjects/WORK/Prismax/QA_PrismaX/Daily_Pull/log/daily_stderr.log</string>
+    <string>__DAILY_PULL_DIR__/log/daily_stderr.log</string>
 </dict>
 </plist>

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 每日拉取多个仓库分支并发送邮件报告（默认 testing，prismax-python 使用 main）
+# 每日拉取多个仓库分支并发送邮件报告（默认 testing，prismax-python / prismax-marketing-rp 使用 main）
 #
 # 用法:
 #   ./daily_pull_testing_branches.sh
